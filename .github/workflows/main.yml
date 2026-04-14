@@ -1,0 +1,46 @@
+name: Z-Plus-3-Pulse-Monitor-Build
+
+# Ye tab chalega jab aap code 'main' branch par push karenge
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build APK on GitHub Server
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Aapka sara code server par download karna
+      - name: 📥 Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 2. Java JDK 17 setup karna (Android build ke liye behtareen hai)
+      - name: ☕ Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. Gradle ko permission dena (Iske baghair build fail ho jati hai)
+      - name: 🛠️ Grant Execute Permission for Gradlew
+        run: chmod +x gradlew
+
+      # 4. APK banana (Sari dependencies khud download karega)
+      - name: 🏗️ Build Debug APK
+        run: ./gradlew assembleDebug
+
+      # 5. Banay gaye APK ko upload karna taake aap download kar sakein
+      - name: 📦 Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Zeeshan-Pulse-App-V3
+          path: app/build/outputs/apk/debug/app-debug.apk
+
+      # 6. Agar build fail ho jaye to error log dikhana
+      - name: ⚠️ Error Report (If Failed)
+        if: failure()
+        run: echo "Build fail ho gayi hai. Check karein ke files sahi se upload hui hain."

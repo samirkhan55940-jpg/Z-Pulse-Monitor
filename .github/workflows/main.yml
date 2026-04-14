@@ -1,4 +1,4 @@
-name: Build Z+3 Pulse AI Voice Pro (Final Fix)
+name: Z+3 AI Voice Pro Build
 
 on:
   push:
@@ -15,21 +15,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 2. Create Project Structure
+      - name: 2. Create Project Folders
         run: |
           mkdir -p app/src/main/java/com/zeeshan/pulse
           mkdir -p app/src/main/res/values
 
-      - name: 3. Setup Error-Free Gradle Config
+      - name: 3. Setup Project Configuration
         run: |
           cat << 'EOF' > settings.gradle
-          pluginManagement { 
-              repositories { google(); mavenCentral(); gradlePluginPortal() } 
-          }
-          dependencyResolutionManagement { 
-              repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
-              repositories { google(); mavenCentral() } 
-          }
+          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
+          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS); repositories { google(); mavenCentral() } }
           rootProject.name = "ZPulseAIVoice"
           include ':app'
           EOF
@@ -41,7 +36,7 @@ jobs:
           }
           EOF
 
-      - name: 4. Write build.gradle (With Guava & CameraX)
+      - name: 4. Write App build.gradle (Dependencies Fixed)
         run: |
           cat << 'EOF' > app/build.gradle
           apply plugin: 'com.android.application'
@@ -52,10 +47,13 @@ jobs:
                   applicationId "com.zeeshan.pulse"
                   minSdk 24
                   targetSdk 34
-                  versionCode 4
-                  versionName "Z+3 AI Voice"
+                  versionCode 5
+                  versionName "Z+3 AI Voice Pro"
               }
-              buildTypes { release { minifyEnabled false } }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_1_8
+                  targetCompatibility JavaVersion.VERSION_1_8
+              }
           }
           dependencies { 
               implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -66,7 +64,28 @@ jobs:
           }
           EOF
 
-      - name: 5. Write MainActivity.java (AI + Voice + History)
+      - name: 5. Write AndroidManifest.xml
+        run: |
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.CAMERA" />
+              <uses-permission android:name="android.permission.FLASHLIGHT" />
+              <uses-feature android:name="android.hardware.camera" />
+              <uses-feature android:name="android.hardware.camera.flash" />
+              
+              <application android:label="Z+³ AI Voice" android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+      - name: 6. Write MainActivity.java (AI + Voice Logic)
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/pulse/MainActivity.java
           package com.zeeshan.pulse;
@@ -92,125 +111,140 @@ jobs:
           import java.util.*;
 
           public class MainActivity extends AppCompatActivity {
-              private TextView bpmText, aiText;
+              private TextView bpmText, aiAdviceText;
               private ArrayList<Long> beats = new ArrayList<>();
               private double lastRedAvg = 0;
+              private SharedPreferences sharedPrefs;
               private TextToSpeech tts;
-              private SharedPreferences prefs;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-                  prefs = getSharedPreferences("ZHistory", MODE_PRIVATE);
+                  sharedPrefs = getSharedPreferences("PulseHistory", MODE_PRIVATE);
                   
-                  // Voice Setup
+                  // Voice AI Setup (Hindi/Urdu style)
                   tts = new TextToSpeech(this, status -> {
-                      if(status == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("hi", "IN"));
+                      if(status == TextToSpeech.SUCCESS) {
+                          tts.setLanguage(new Locale("hi", "IN"));
+                      }
                   });
-
+                  
                   LinearLayout root = new LinearLayout(this);
                   root.setOrientation(LinearLayout.VERTICAL);
-                  root.setBackgroundColor(Color.parseColor("#000000"));
+                  root.setBackgroundColor(Color.BLACK);
                   root.setGravity(Gravity.CENTER);
-                  root.setPadding(50, 50, 50, 50);
+                  root.setPadding(40, 40, 40, 40);
+
+                  TextView aiTitle = new TextView(this);
+                  aiTitle.setText("--- Z+³ AI VOICE BRAIN ---");
+                  aiTitle.setTextColor(Color.CYAN);
+                  aiTitle.setGravity(Gravity.CENTER);
 
                   bpmText = new TextView(this);
                   bpmText.setText("--");
-                  bpmText.setTextColor(Color.GREEN);
-                  bpmText.setTextSize(110);
-                  bpmText.setGravity(Gravity.CENTER);
+                  bpmText.setTextColor(Color.parseColor("#22C55E"));
+                  bpmText.setTextSize(90);
+                  
+                  aiAdviceText = new TextView(this);
+                  aiAdviceText.setText("AI: Scan start karein...");
+                  aiAdviceText.setTextColor(Color.YELLOW);
+                  aiAdviceText.setGravity(Gravity.CENTER);
+                  aiAdviceText.setPadding(0, 20, 0, 50);
 
-                  aiText = new TextView(this);
-                  aiText.setText("AI: Taiyar hain? Start dabayein.");
-                  aiText.setTextColor(Color.CYAN);
-                  aiText.setGravity(Gravity.CENTER);
-                  aiText.setPadding(0, 20, 0, 40);
+                  Button btnStart = new Button(this);
+                  btnStart.setText("START VOICE SCAN");
+                  btnStart.setBackgroundColor(Color.RED);
+                  btnStart.setTextColor(Color.WHITE);
 
-                  Button startBtn = new Button(this);
-                  startBtn.setText("AI VOICE SCAN");
-                  startBtn.setBackgroundColor(Color.RED);
-                  startBtn.setTextColor(Color.WHITE);
-
-                  Button histBtn = new Button(this);
-                  histBtn.setText("HISTORY");
-                  histBtn.setTextColor(Color.LTGRAY);
-
-                  root.addView(bpmText); root.addView(aiText);
-                  root.addView(startBtn); root.addView(histBtn);
+                  root.addView(aiTitle);
+                  root.addView(bpmText);
+                  root.addView(aiAdviceText);
+                  root.addView(btnStart);
                   setContentView(root);
 
-                  startBtn.setOnClickListener(v -> {
+                  btnStart.setOnClickListener(v -> {
                       if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                          ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
-                      } else { startCamera(); }
-                  });
-
-                  histBtn.setOnClickListener(v -> {
-                      String data = prefs.getString("logs", "Koi history nahi hai.");
-                      new AlertDialog.Builder(this).setTitle("Old Records").setMessage(data).show();
+                          ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 10);
+                      } else { 
+                          startCamera(); 
+                          speakOut("Scan shuru ho raha hai, ungli camera par rakhein");
+                      }
                   });
               }
 
               private void startCamera() {
-                  ListenableFuture<ProcessCameraProvider> future = ProcessCameraProvider.getInstance(this);
-                  future.addListener(() -> {
+                  ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+                  cameraProviderFuture.addListener(() -> {
                       try {
-                          ProcessCameraProvider provider = future.get();
+                          ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
                           ImageAnalysis analysis = new ImageAnalysis.Builder()
-                              .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
+                                  .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
                           analysis.setAnalyzer(ContextCompat.getMainExecutor(this), image -> {
-                              analyzePulse(image); image.close();
+                              analyzeImage(image); image.close();
                           });
-                          Camera cam = provider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, analysis);
+                          Camera cam = cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, analysis);
                           cam.getCameraControl().enableTorch(true);
-                          runOnUiThread(() -> aiText.setText("AI: Khoon ki gardish check ho rahi hai..."));
                       } catch (Exception e) {}
                   }, ContextCompat.getMainExecutor(this));
               }
 
-              private void analyzePulse(ImageProxy image) {
+              private void analyzeImage(ImageProxy image) {
                   ByteBuffer buffer = image.getPlanes()[0].getBuffer();
                   byte[] data = new byte[buffer.remaining()];
                   buffer.get(data);
-                  double red = 0;
-                  for (byte b : data) red += (b & 0xFF);
-                  red /= data.length;
+                  double redAvg = 0;
+                  for (byte b : data) redAvg += (b & 0xFF);
+                  redAvg /= data.length;
 
-                  if (lastRedAvg > 0 && red < lastRedAvg * 0.9985) {
+                  if (lastRedAvg > 0 && redAvg < lastRedAvg * 0.998) {
                       long now = System.currentTimeMillis();
-                      if (beats.isEmpty() || now - beats.get(beats.size()-1) > 550) {
+                      if (beats.isEmpty() || now - beats.get(beats.size()-1) > 500) {
                           beats.add(now);
-                          if (beats.size() > 6) {
-                              long diff = beats.get(beats.size()-1) - beats.get(beats.size()-6);
-                              int bpm = (int) (60000 * 5 / diff);
-                              runOnUiThread(() -> updateUI(bpm));
+                          if (beats.size() > 8) {
+                              long diff = beats.get(beats.size()-1) - beats.get(beats.size()-8);
+                              int bpm = (int) (60000 * 7 / diff);
+                              runOnUiThread(() -> {
+                                  bpmText.setText(String.valueOf(bpm));
+                                  if(beats.size() == 10) { updateAIAdvice(bpm); }
+                              });
                           }
                       }
                   }
-                  lastRedAvg = red;
+                  lastRedAvg = redAvg;
               }
 
-              private void updateUI(int bpm) {
-                  bpmText.setText(String.valueOf(bpm));
-                  String msg = (bpm > 100) ? "Aapka BP high lag raha hai, araam karein." : "Aap bilkul normal hain.";
-                  aiText.setText("AI Advice: " + msg);
-                  if (beats.size() % 15 == 0) {
-                      tts.speak("Aapki dharkan " + bpm + " beats per minute hai. " + msg, TextToSpeech.QUEUE_FLUSH, null, null);
-                      String log = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date()) + ": " + bpm + " BPM\n";
-                      prefs.edit().putString("logs", log + prefs.getString("logs", "")).apply();
+              private void updateAIAdvice(int bpm) {
+                  String advice;
+                  if (bpm < 60) advice = "Aapki dharkan slow hai.";
+                  else if (bpm <= 100) advice = "Aap bilkul fit hain, good job!";
+                  else advice = "Dharkan tez hai, thoda paani pee lein.";
+                  
+                  aiAdviceText.setText("AI: " + advice);
+                  speakOut(advice);
+              }
+
+              private void speakOut(String text) {
+                  if(tts != null) {
+                      tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
                   }
+              }
+              
+              @Override
+              protected void onDestroy() {
+                  if (tts != null) { tts.stop(); tts.shutdown(); }
+                  super.onDestroy();
               }
           }
           EOF
 
-      - name: 6. Build APK
+      - name: 7. Build APK
         run: |
           gradle wrapper --gradle-version 8.4
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: 7. Upload Advanced AI Voice APK
+      - name: 8. Upload AI Voice APK
         uses: actions/upload-artifact@v4
         with:
-          name: ZPlus3-AI-Voice-Pro
+          name: ZPlus3-AI-Voice-APK
           path: app/build/outputs/apk/debug/*.apk

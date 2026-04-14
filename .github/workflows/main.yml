@@ -1,4 +1,4 @@
-name: Build Z+3 Pulse Monitor (All-in-One Fix)
+name: Build Z+3 Pulse AI Pro
 
 on:
   push:
@@ -9,24 +9,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Setup Environment & JDK 17
+      - name: 1. Setup JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 2. Create Project Folders
-        run: |
-          mkdir -p app/src/main/java/com/zeeshan/pulse
-          mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/drawable
+      - name: 2. Create Folders
+        run: mkdir -p app/src/main/java/com/zeeshan/pulse app/src/main/res/values
 
-      - name: 3. Setup Gradle Settings & Properties
+      - name: 3. Setup Android Config
         run: |
           cat << 'EOF' > settings.gradle
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS); repositories { google(); mavenCentral() } }
-          rootProject.name = "ZPulseMonitor"
+          rootProject.name = "ZPulseAI"
           include ':app'
           EOF
 
@@ -35,15 +32,9 @@ jobs:
               repositories { google(); mavenCentral() }
               dependencies { classpath 'com.android.tools.build:gradle:8.2.0' }
           }
-          allprojects {
-              repositories { google(); mavenCentral() }
-          }
           EOF
 
-          echo "android.useAndroidX=true" > gradle.properties
-          echo "android.enableJetifier=true" >> gradle.properties
-
-      - name: 4. Write App Build Configurations
+      - name: 4. Write build.gradle
         run: |
           cat << 'EOF' > app/build.gradle
           apply plugin: 'com.android.application'
@@ -54,135 +45,166 @@ jobs:
                   applicationId "com.zeeshan.pulse"
                   minSdk 24
                   targetSdk 34
-                  versionCode 1
-                  versionName "Z+3 Pulse"
+                  versionCode 3
+                  versionName "Z+3 AI Pro"
               }
           }
           dependencies { 
-              implementation 'androidx.appcompat:appcompat:1.6.1' 
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation "androidx.camera:camera-camera2:1.3.0"
+              implementation "androidx.camera:camera-lifecycle:1.3.0"
+              implementation "androidx.camera:camera-view:1.3.0"
           }
           EOF
 
-      - name: 5. Write AndroidManifest (Permissions)
-        run: |
-          cat << 'EOF' > app/src/main/AndroidManifest.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.CAMERA" />
-              <uses-permission android:name="android.permission.FLASHLIGHT" />
-              <uses-feature android:name="android.hardware.camera" />
-              <uses-feature android:name="android.hardware.camera.flash" />
-              
-              <application android:label="Z+³ Pulse" android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-                  <activity android:name=".MainActivity" android:exported="true">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          EOF
-
-      - name: 6. Write MainActivity.java (No XML layout needed, UI in Java)
+      - name: 5. Write MainActivity.java (AI Logic Included)
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/pulse/MainActivity.java
           package com.zeeshan.pulse;
-          
+
           import android.Manifest;
-          import android.content.Context;
+          import android.content.SharedPreferences;
           import android.content.pm.PackageManager;
           import android.graphics.Color;
-          import android.hardware.camera2.CameraManager;
           import android.os.Bundle;
           import android.view.Gravity;
+          import android.view.View;
           import android.widget.*;
+          import androidx.appcompat.app.AlertDialog;
           import androidx.appcompat.app.AppCompatActivity;
+          import androidx.camera.core.*;
+          import androidx.camera.lifecycle.ProcessCameraProvider;
           import androidx.core.app.ActivityCompat;
+          import androidx.core.content.ContextCompat;
+          import com.google.common.util.concurrent.ListenableFuture;
+          import java.nio.ByteBuffer;
+          import java.text.SimpleDateFormat;
+          import java.util.*;
 
           public class MainActivity extends AppCompatActivity {
-              private CameraManager camManager;
-              private String camId;
-              private boolean isFlashOn = false;
-              private TextView bpmText;
+              private TextView bpmText, aiAdviceText;
+              private ArrayList<Long> beats = new ArrayList<>();
+              private double lastRedAvg = 0;
+              private SharedPreferences sharedPrefs;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
+                  sharedPrefs = getSharedPreferences("PulseHistory", MODE_PRIVATE);
                   
-                  // App ka Design (Layout) yahi Java mein banaya hai taake code chota rahe
                   LinearLayout root = new LinearLayout(this);
                   root.setOrientation(LinearLayout.VERTICAL);
                   root.setBackgroundColor(Color.BLACK);
                   root.setGravity(Gravity.CENTER);
-                  
-                  TextView title = new TextView(this);
-                  title.setText("Z+³ Pulse Monitor");
-                  title.setTextColor(Color.parseColor("#00FF00")); // Green
-                  title.setTextSize(26);
-                  title.setGravity(Gravity.CENTER);
-                  title.setPadding(0, 0, 0, 100);
-                  
+                  root.setPadding(40, 40, 40, 40);
+
+                  TextView aiTitle = new TextView(this);
+                  aiTitle.setText("--- Z+³ AI BRAIN ---");
+                  aiTitle.setTextColor(Color.CYAN);
+                  aiTitle.setGravity(Gravity.CENTER);
+
                   bpmText = new TextView(this);
-                  bpmText.setText("-- BPM");
-                  bpmText.setTextColor(Color.parseColor("#FF0000")); // Red
-                  bpmText.setTextSize(60);
-                  bpmText.setGravity(Gravity.CENTER);
-                  bpmText.setPadding(0, 0, 0, 100);
+                  bpmText.setText("--");
+                  bpmText.setTextColor(Color.parseColor("#22C55E"));
+                  bpmText.setTextSize(90);
                   
-                  Button btn = new Button(this);
-                  btn.setText("START SCAN");
-                  btn.setBackgroundColor(Color.parseColor("#FF0000"));
-                  btn.setTextColor(Color.WHITE);
-                  btn.setTextSize(20);
-                  
-                  root.addView(title);
+                  aiAdviceText = new TextView(this);
+                  aiAdviceText.setText("AI: Waiting for Scan...");
+                  aiAdviceText.setTextColor(Color.YELLOW);
+                  aiAdviceText.setGravity(Gravity.CENTER);
+                  aiAdviceText.setPadding(0, 20, 0, 50);
+
+                  Button btnStart = new Button(this);
+                  btnStart.setText("AI PULSE SCAN");
+                  btnStart.setBackgroundColor(Color.RED);
+                  btnStart.setTextColor(Color.WHITE);
+
+                  Button btnHistory = new Button(this);
+                  btnHistory.setText("HISTORY");
+                  btnHistory.setTextColor(Color.GRAY);
+
+                  root.addView(aiTitle);
                   root.addView(bpmText);
-                  root.addView(btn);
+                  root.addView(aiAdviceText);
+                  root.addView(btnStart);
+                  root.addView(btnHistory);
                   setContentView(root);
-                  
-                  camManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
-                  
-                  btn.setOnClickListener(v -> {
-                      if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                          ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 100);
-                      } else {
-                          toggleTorch();
-                      }
-                  });
+
+                  btnStart.setOnClickListener(v -> startCamera());
+                  btnHistory.setOnClickListener(v -> showHistory());
               }
-              
-              private void toggleTorch() {
-                  try {
-                      camId = camManager.getCameraIdList()[0];
-                      if (!isFlashOn) {
-                          camManager.setTorchMode(camId, true);
-                          isFlashOn = true;
-                          bpmText.setText("Scanning...");
-                          Toast.makeText(this, "Ungli Camera Lens par rakhein!", Toast.LENGTH_LONG).show();
-                      } else {
-                          camManager.setTorchMode(camId, false);
-                          isFlashOn = false;
-                          bpmText.setText("-- BPM");
-                      }
-                  } catch (Exception e) { e.printStackTrace(); }
+
+              private void startCamera() {
+                  ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+                  cameraProviderFuture.addListener(() -> {
+                      try {
+                          ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                          ImageAnalysis analysis = new ImageAnalysis.Builder()
+                                  .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
+                          analysis.setAnalyzer(ContextCompat.getMainExecutor(this), image -> {
+                              analyzeImage(image); image.close();
+                          });
+                          Camera cam = cameraProvider.bindToLifecycle(this, CameraSelector.DEFAULT_BACK_CAMERA, analysis);
+                          cam.getCameraControl().enableTorch(true);
+                          runOnUiThread(() -> aiAdviceText.setText("AI: Analyzing Blood Flow..."));
+                      } catch (Exception e) {}
+                  }, ContextCompat.getMainExecutor(this));
               }
-              
-              @Override
-              protected void onPause() {
-                  super.onPause();
-                  if (isFlashOn) { toggleTorch(); } // App band hone par torch khud band ho jayegi
+
+              private void analyzeImage(ImageProxy image) {
+                  ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                  byte[] data = new byte[buffer.remaining()];
+                  buffer.get(data);
+                  double redAvg = 0;
+                  for (byte b : data) redAvg += (b & 0xFF);
+                  redAvg /= data.length;
+
+                  if (lastRedAvg > 0 && redAvg < lastRedAvg * 0.998) {
+                      long now = System.currentTimeMillis();
+                      if (beats.isEmpty() || now - beats.get(beats.size()-1) > 500) {
+                          beats.add(now);
+                          if (beats.size() > 8) {
+                              long diff = beats.get(beats.size()-1) - beats.get(beats.size()-8);
+                              int bpm = (int) (60000 * 7 / diff);
+                              runOnUiThread(() -> {
+                                  bpmText.setText(String.valueOf(bpm));
+                                  updateAIAdvice(bpm);
+                                  if(beats.size() % 15 == 0) saveToHistory(bpm);
+                              });
+                          }
+                      }
+                  }
+                  lastRedAvg = redAvg;
+              }
+
+              private void updateAIAdvice(int bpm) {
+                  String advice;
+                  if (bpm < 60) advice = "AI: Heart rate low. Are you sleeping or an athlete?";
+                  else if (bpm <= 100) advice = "AI: Normal. Aap bilkul fit hain, kaam jari rakhein!";
+                  else advice = "AI: High! Thoda paani piyoin aur 5 min rest karein.";
+                  aiAdviceText.setText(advice);
+              }
+
+              private void saveToHistory(int bpm) {
+                  String time = new SimpleDateFormat("HH:mm", Locale.getDefault()).format(new Date());
+                  String old = sharedPrefs.getString("data", "");
+                  sharedPrefs.edit().putString("data", time + " | BPM: " + bpm + "\n" + old).apply();
+              }
+
+              private void showHistory() {
+                  new AlertDialog.Builder(this).setTitle("History").setMessage(sharedPrefs.getString("data", "Empty")).show();
               }
           }
           EOF
 
-      - name: 7. Generate Gradle Wrapper & Build APK
+      - name: 6. Build APK
         run: |
           gradle wrapper --gradle-version 8.4
+          chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: 8. Upload Z+3 Artifact
+      - name: 7. Upload AI APK
         uses: actions/upload-artifact@v4
         with:
-          name: Zeeshan-Pulse-App-V3
+          name: ZPlus3-AI-Pro
           path: app/build/outputs/apk/debug/*.apk

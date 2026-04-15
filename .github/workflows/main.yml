@@ -1,4 +1,4 @@
-name: Z+3 AI Voice Pro Max (Final Kotlin Fix)
+name: Build Z+3 Zombie Ultimate Pro (Master Fix)
 
 on:
   push:
@@ -15,18 +15,19 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 2. Create All Project Folders
+      - name: 2. Create Project Folders
         run: |
-          mkdir -p app/src/main/java/com/zeeshan/pulse
+          mkdir -p app/src/main/java/com/zeeshan/zombie
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/mipmap-xxhdpi
+          mkdir -p app/src/main/cpp
 
-      - name: 3. Setup Android System Files & RAM Limit
+      - name: 3. Setup Android System Files (RAM Fix)
         run: |
           cat << 'EOF' > settings.gradle
           pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
           dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS); repositories { google(); mavenCentral() } }
-          rootProject.name = "ZPulseProMax"
+          rootProject.name = "ZZombieUltimate"
           include ':app'
           EOF
 
@@ -41,80 +42,68 @@ jobs:
           echo "android.useAndroidX=true" >> gradle.properties
           echo "android.enableJetifier=true" >> gradle.properties
 
-      - name: 4. Download Dummy App Icon
-        run: |
-          wget -q "https://raw.githubusercontent.com/google/material-design-icons/master/png/hardware/memory/materialicons/24dp/2x/baseline_memory_black_24dp.png" -O app/src/main/res/mipmap-xxhdpi/ic_launcher.png
-
-      - name: 5. Write App Build Config (KOTLIN KILLER ADDED)
+      - name: 4. Write App Build Configuration (Clash Fix)
         run: |
           cat << 'EOF' > app/build.gradle
           apply plugin: 'com.android.application'
-          
           android {
-              namespace 'com.zeeshan.pulse'
+              namespace 'com.zeeshan.zombie'
               compileSdk 34
               defaultConfig {
-                  applicationId "com.zeeshan.pulse"
+                  applicationId "com.zeeshan.zombie"
                   minSdk 24
                   targetSdk 34
-                  versionCode 16
-                  versionName "Z+3 Supreme Final"
+                  versionCode 24
+                  versionName "24-Mission-Pro"
+                  externalNativeBuild { cmake { cppFlags "" } }
+                  ndk { abiFilters 'arm64-v8a' }
               }
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_1_8
-                  targetCompatibility JavaVersion.VERSION_1_8
-              }
-              lint { abortOnError false }
-              
+              externalNativeBuild { cmake { path "src/main/cpp/CMakeLists.txt" } }
               packagingOptions {
                   pickFirst 'META-INF/**'
-                  pickFirst '**/*.so'
                   pickFirst '**/*.kotlin_module'
-                  exclude 'META-INF/DEPENDENCIES'
               }
           }
-          
-          // YEH HISSA DUPLICATE KOTLIN FILES KO BAHAR NIKAL DEGA
           configurations.all {
               exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
           }
+          dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
+          EOF
+
+      - name: 5. Write 3D Weather Engine (C++)
+        run: |
+          cat << 'EOF' > app/src/main/cpp/CMakeLists.txt
+          cmake_minimum_required(VERSION 3.22.1)
+          project("zombie_engine")
+          add_library(zombie_engine SHARED native-lib.cpp)
+          find_library(log-lib log)
+          find_library(gles-lib GLESv3)
+          target_link_libraries(zombie_engine ${log-lib} ${gles-lib})
+          EOF
+
+          cat << 'EOF' > app/src/main/cpp/native-lib.cpp
+          #include <jni.h>
+          #include <GLES3/gl3.h>
+          extern "C" JNIEXPORT void JNICALL
+          Java_com_zeeshan_zombie_MainActivity_update3DEnvironment(JNIEnv* env, jobject obj, jint type) {
+              if (type == 1) glClearColor(0.1f, 0.1f, 0.3f, 1.0f); // Rain
+              else if (type == 2) glClearColor(0.4f, 0.1f, 0.0f, 1.0f); // Heat
+              else glClearColor(0.7f, 0.7f, 0.9f, 1.0f); // Snow
+              glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+          }
+          EOF
+
+      - name: 6. Write Strings & Manifest (Permissions Added)
+        run: |
+          echo '<resources><string name="app_name">Z+³ Zombie Pro 24</string></resources>' > app/src/main/res/values/strings.xml
           
-          dependencies { 
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation "androidx.camera:camera-camera2:1.3.0"
-              implementation "androidx.camera:camera-lifecycle:1.3.0"
-              implementation "androidx.camera:camera-view:1.3.0"
-              implementation 'com.google.guava:guava:31.1-android'
-          }
-          EOF
-
-      - name: 6. Write Strings File
-        run: |
-          cat << 'EOF' > app/src/main/res/values/strings.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <string name="app_name">Z+³ Pro Max</string>
-          </resources>
-          EOF
-
-      - name: 7. Write AndroidManifest (Permissions & TV Mode)
-        run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
-          <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.CAMERA" />
               <uses-permission android:name="android.permission.RECORD_AUDIO" />
-              <uses-permission android:name="android.permission.FLASHLIGHT" />
-              
-              <uses-feature android:name="android.hardware.camera" android:required="false" />
-              <uses-feature android:name="android.hardware.microphone" android:required="false" />
-
-              <application 
-                  android:icon="@mipmap/ic_launcher"
-                  android:label="@string/app_name" 
-                  android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-                  <activity android:name=".MainActivity" android:exported="true">
+              <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+              <application android:label="Z+³ Zombie Pro" android:theme="@style/Theme.AppCompat.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="landscape">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
                           <category android:name="android.intent.category.LAUNCHER" />
@@ -124,314 +113,146 @@ jobs:
           </manifest>
           EOF
 
-      - name: 8. Write MainActivity.java (THE FULL LOGIC - NO CUTS)
+      - name: 7. Write MainActivity.java (THE COMPLETE LOGIC)
         run: |
-          cat << 'EOF' > app/src/main/java/com/zeeshan/pulse/MainActivity.java
-          package com.zeeshan.pulse;
+          cat << 'EOF' > app/src/main/java/com/zeeshan/zombie/MainActivity.java
+          package com.zeeshan.zombie;
 
           import android.Manifest;
-          import android.content.Intent;
           import android.content.SharedPreferences;
           import android.content.pm.PackageManager;
           import android.graphics.Color;
           import android.os.Bundle;
-          import android.speech.RecognitionListener;
-          import android.speech.RecognizerIntent;
-          import android.speech.SpeechRecognizer;
-          import android.speech.tts.TextToSpeech;
           import android.view.View;
           import android.widget.*;
-          import androidx.appcompat.app.AlertDialog;
           import androidx.appcompat.app.AppCompatActivity;
-          import androidx.camera.core.*;
-          import androidx.camera.lifecycle.ProcessCameraProvider;
-          import androidx.camera.view.PreviewView;
           import androidx.core.app.ActivityCompat;
           import androidx.core.content.ContextCompat;
-          import com.google.common.util.concurrent.ListenableFuture;
-
-          import java.nio.ByteBuffer;
-          import java.text.SimpleDateFormat;
-          import java.util.*;
 
           public class MainActivity extends AppCompatActivity {
-              private PreviewView cameraPreview;
-              private TextView bpmText, aiStatus;
-              private TextToSpeech tts;
-              private SpeechRecognizer speechRecognizer;
-              
-              private boolean isHindi = true;
-              private boolean isScanning = false;
-              
-              private ArrayList<Long> beats = new ArrayList<>();
-              private double lastRedAvg = 0;
-              private SharedPreferences sharedPrefs;
+              private int dollars = 0, mission = 1, kills = 0, health = 100;
+              private boolean hasShotgun = false;
+              private TextView hud, weatherText;
+              private SharedPreferences prefs;
+
+              static { System.loadLibrary("zombie_engine"); }
+              public native void update3DEnvironment(int type);
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-                  sharedPrefs = getSharedPreferences("ZPulseHistory", MODE_PRIVATE);
+                  prefs = getSharedPreferences("ZSave", MODE_PRIVATE);
+                  dollars = prefs.getInt("dollars", 0);
+                  mission = prefs.getInt("mission", 1);
+                  hasShotgun = prefs.getBoolean("shotgun", false);
 
-                  tts = new TextToSpeech(MainActivity.this, status -> {
-                      if(status == TextToSpeech.SUCCESS) {
-                          tts.setLanguage(new Locale("hi", "IN"));
+                  // Ijaajat (Permission) Request System
+                  checkGamePermissions();
+
+                  RelativeLayout root = new RelativeLayout(this);
+                  root.setBackgroundColor(Color.BLACK);
+
+                  weatherText = new TextView(this);
+                  weatherText.setTextColor(Color.CYAN);
+                  root.addView(weatherText);
+
+                  hud = new TextView(this);
+                  hud.setTextColor(Color.YELLOW);
+                  hud.setTextSize(18);
+                  hud.setPadding(30, 100, 30, 30);
+                  updateHUD();
+                  root.addView(hud);
+
+                  Button btnShoot = new Button(this);
+                  btnShoot.setText("🔥 OPEN FIRE");
+                  btnShoot.setBackgroundColor(Color.RED);
+                  btnShoot.setTextColor(Color.WHITE);
+                  setupButton(btnShoot, 300);
+                  root.addView(btnShoot);
+
+                  Button btnShop = new Button(this);
+                  btnShop.setText(hasShotgun ? "SHOTGUN EQUIPPED" : "BUY SHOTGUN ($10)");
+                  btnShop.setBackgroundColor(Color.BLUE);
+                  btnShop.setTextColor(Color.WHITE);
+                  setupButton(btnShop, 100);
+                  root.addView(btnShop);
+
+                  btnShoot.setOnClickListener(v -> {
+                      if(health <= 0) {
+                          Toast.makeText(this, "You Died! Mission Restart.", Toast.LENGTH_SHORT).show();
+                          health = 100; updateHUD(); return;
+                      }
+                      
+                      kills += (hasShotgun ? 2 : 1);
+                      if(mission >= 5) {
+                          health -= (mission > 15 ? 5 : 2); // Harder levels = More damage
+                          Toast.makeText(this, "Zombies are shooting back!", Toast.LENGTH_SHORT).show();
+                      }
+
+                      if(kills >= (mission * 4)) completeMission();
+                      updateHUD();
+                      applyWeather();
+                  });
+
+                  btnShop.setOnClickListener(v -> {
+                      if(!hasShotgun && dollars >= 10) {
+                          dollars -= 10; hasShotgun = true;
+                          save(); btnShop.setText("SHOTGUN EQUIPPED"); updateHUD();
                       }
                   });
 
-                  RelativeLayout root = new RelativeLayout(MainActivity.this);
-                  root.setBackgroundColor(Color.parseColor("#0F172A")); 
-
-                  // 1. Live Camera Preview Border
-                  cameraPreview = new PreviewView(MainActivity.this);
-                  cameraPreview.setId(View.generateViewId());
-                  RelativeLayout.LayoutParams camLp = new RelativeLayout.LayoutParams(450, 450);
-                  camLp.addRule(RelativeLayout.CENTER_HORIZONTAL);
-                  camLp.topMargin = 50;
-                  cameraPreview.setLayoutParams(camLp);
-                  
-                  // 2. BPM Text
-                  bpmText = new TextView(MainActivity.this);
-                  bpmText.setId(View.generateViewId());
-                  bpmText.setText("--");
-                  bpmText.setTextSize(90);
-                  bpmText.setTextColor(Color.parseColor("#22C55E")); 
-                  RelativeLayout.LayoutParams bpmLp = new RelativeLayout.LayoutParams(-2, -2);
-                  bpmLp.addRule(RelativeLayout.BELOW, cameraPreview.getId());
-                  bpmLp.addRule(RelativeLayout.CENTER_HORIZONTAL);
-                  bpmLp.topMargin = 50;
-                  bpmText.setLayoutParams(bpmLp);
-
-                  // 3. AI Status Text
-                  aiStatus = new TextView(MainActivity.this);
-                  aiStatus.setId(View.generateViewId());
-                  aiStatus.setText("Mike Ready: Boliye 'Start' ya 'Shuru'");
-                  aiStatus.setTextColor(Color.YELLOW);
-                  aiStatus.setTextSize(18);
-                  RelativeLayout.LayoutParams stLp = new RelativeLayout.LayoutParams(-2, -2);
-                  stLp.addRule(RelativeLayout.BELOW, bpmText.getId());
-                  stLp.addRule(RelativeLayout.CENTER_HORIZONTAL);
-                  stLp.topMargin = 30;
-                  aiStatus.setLayoutParams(stLp);
-
-                  // 4. Start Button
-                  Button btnStart = new Button(MainActivity.this);
-                  btnStart.setId(View.generateViewId());
-                  btnStart.setText("START MANUALLY");
-                  btnStart.setBackgroundColor(Color.RED);
-                  btnStart.setTextColor(Color.WHITE);
-                  RelativeLayout.LayoutParams btnLp = new RelativeLayout.LayoutParams(-2, -2);
-                  btnLp.addRule(RelativeLayout.BELOW, aiStatus.getId());
-                  btnLp.addRule(RelativeLayout.CENTER_HORIZONTAL);
-                  btnLp.topMargin = 50;
-                  btnStart.setLayoutParams(btnLp);
-
-                  // 5. Language Toggle
-                  Button btnLang = new Button(MainActivity.this);
-                  btnLang.setText("HINDI/ENG");
-                  btnLang.setTextColor(Color.WHITE);
-                  btnLang.setBackgroundColor(Color.DKGRAY);
-                  RelativeLayout.LayoutParams langLp = new RelativeLayout.LayoutParams(-2, -2);
-                  langLp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                  langLp.addRule(RelativeLayout.ALIGN_PARENT_LEFT);
-                  langLp.bottomMargin = 30; langLp.leftMargin = 30;
-                  btnLang.setLayoutParams(langLp);
-
-                  // 6. History
-                  Button btnHistory = new Button(MainActivity.this);
-                  btnHistory.setText("HISTORY");
-                  btnHistory.setTextColor(Color.WHITE);
-                  btnHistory.setBackgroundColor(Color.DKGRAY);
-                  RelativeLayout.LayoutParams histLp = new RelativeLayout.LayoutParams(-2, -2);
-                  histLp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                  histLp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
-                  histLp.bottomMargin = 30; histLp.rightMargin = 30;
-                  btnHistory.setLayoutParams(histLp);
-
-                  root.addView(cameraPreview); root.addView(bpmText); root.addView(aiStatus);
-                  root.addView(btnStart); root.addView(btnLang); root.addView(btnHistory);
                   setContentView(root);
-
-                  btnLang.setOnClickListener(v -> {
-                      isHindi = !isHindi;
-                      tts.setLanguage(isHindi ? new Locale("hi", "IN") : Locale.US);
-                      Toast.makeText(MainActivity.this, isHindi ? "Hindi Mode" : "English Mode", Toast.LENGTH_SHORT).show();
-                  });
-
-                  btnHistory.setOnClickListener(v -> {
-                      String data = sharedPrefs.getString("data", "No History Found");
-                      new AlertDialog.Builder(MainActivity.this).setTitle("Z+³ History").setMessage(data).show();
-                  });
-
-                  btnStart.setOnClickListener(v -> checkPermissionsAndStart());
-                  checkPermissionsForMike();
+                  applyWeather();
               }
 
-              private void checkPermissionsForMike() {
-                  if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
-                      ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.CAMERA}, 1);
-                  } else {
-                      setupSpeechRecognizer();
+              private void checkGamePermissions() {
+                  String[] permissions = {Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
+                  if (ContextCompat.checkSelfPermission(this, permissions[0]) != PackageManager.PERMISSION_GRANTED) {
+                      ActivityCompat.requestPermissions(this, permissions, 100);
                   }
               }
 
-              private void checkPermissionsAndStart() {
-                  if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                      startPulseScan();
-                  } else {
-                      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 2);
+              private void setupButton(Button b, int bottom) {
+                  RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(-1, 150);
+                  lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+                  lp.setMargins(50, 0, 50, bottom);
+                  b.setLayoutParams(lp);
+              }
+
+              private void applyWeather() {
+                  int t;
+                  if (mission <= 8) { t = 1; weatherText.setText("MAP: RAINY FACTORY"); }
+                  else if (mission <= 16) { t = 2; weatherText.setText("MAP: HOT DESERT"); }
+                  else { t = 3; weatherText.setText("MAP: SNOWY MOUNTAIN"); }
+                  update3DEnvironment(t);
+              }
+
+              private void completeMission() {
+                  if(mission < 24) {
+                      dollars += 2; mission++; kills = 0;
+                      save();
+                      Toast.makeText(this, "Mission Clear! +$2", Toast.LENGTH_SHORT).show();
                   }
               }
 
-              private void setupSpeechRecognizer() {
-                  speechRecognizer = SpeechRecognizer.createSpeechRecognizer(MainActivity.this);
-                  startListening();
+              private void updateHUD() {
+                  hud.setText("MISSION: " + mission + "/24\nHEALTH: " + health + "%\nCASH: $" + dollars + "\nGUN: " + (hasShotgun ? "SHOTGUN" : "PISTOL"));
               }
 
-              private void startListening() {
-                  Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-                  intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-                  speechRecognizer.startListening(intent);
-                  
-                  speechRecognizer.setRecognitionListener(new RecognitionListener() {
-                      public void onResults(Bundle results) {
-                          ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-                          if (matches != null && !matches.isEmpty()) {
-                              String spoken = matches.get(0).toLowerCase();
-                              if (spoken.contains("start") || spoken.contains("shuru") || spoken.contains("karo")) {
-                                  checkPermissionsAndStart();
-                              } else { startListening(); }
-                          } else { startListening(); }
-                      }
-                      public void onReadyForSpeech(Bundle params) {}
-                      public void onBeginningOfSpeech() {}
-                      public void onRmsChanged(float rmsdB) {}
-                      public void onBufferReceived(byte[] buffer) {}
-                      public void onEndOfSpeech() {}
-                      public void onError(int error) { startListening(); } 
-                      public void onPartialResults(Bundle partialResults) {}
-                      public void onEvent(int eventType, Bundle params) {}
-                  });
-              }
-
-              private void startPulseScan() {
-                  if (isScanning) return;
-                  isScanning = true;
-                  beats.clear();
-                  lastRedAvg = 0;
-                  
-                  String msg = isHindi ? "Scan shuru ho raha hai, ungli camera par rakhein" : "Starting scan, place your finger on the camera";
-                  speakOut(msg);
-                  aiStatus.setText("AI: Analyzing Blood Flow...");
-                  bpmText.setText("--");
-
-                  ListenableFuture<ProcessCameraProvider> cameraProviderFuture = ProcessCameraProvider.getInstance(MainActivity.this);
-                  cameraProviderFuture.addListener(() -> {
-                      try {
-                          ProcessCameraProvider camProvider = cameraProviderFuture.get();
-                          camProvider.unbindAll(); 
-
-                          Preview preview = new Preview.Builder().build();
-                          preview.setSurfaceProvider(cameraPreview.getSurfaceProvider());
-
-                          ImageAnalysis analysis = new ImageAnalysis.Builder()
-                                  .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build();
-                          
-                          analysis.setAnalyzer(ContextCompat.getMainExecutor(MainActivity.this), image -> {
-                              analyzeImage(image);
-                              image.close();
-                          });
-
-                          CameraSelector selector = CameraSelector.DEFAULT_BACK_CAMERA;
-                          Camera cam = camProvider.bindToLifecycle(MainActivity.this, selector, preview, analysis);
-                          cam.getCameraControl().enableTorch(true); 
-                      } catch (Exception e) {
-                          e.printStackTrace();
-                      }
-                  }, ContextCompat.getMainExecutor(MainActivity.this));
-              }
-
-              private void analyzeImage(ImageProxy image) {
-                  if(!isScanning) return;
-
-                  ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                  byte[] data = new byte[buffer.remaining()];
-                  buffer.get(data);
-                  
-                  double redAvg = 0;
-                  for (byte b : data) redAvg += (b & 0xFF);
-                  redAvg /= data.length;
-
-                  if (lastRedAvg > 0 && redAvg < lastRedAvg * 0.998) {
-                      long now = System.currentTimeMillis();
-                      if (beats.isEmpty() || now - beats.get(beats.size()-1) > 500) {
-                          beats.add(now);
-                          
-                          if (beats.size() > 10) {
-                              long diff = beats.get(beats.size()-1) - beats.get(beats.size()-10);
-                              int bpm = (int) (60000 * 9 / diff);
-                              
-                              runOnUiThread(() -> {
-                                  bpmText.setText(String.valueOf(bpm));
-                                  if(beats.size() == 12) { 
-                                      updateAIAdvice(bpm);
-                                      saveToHistory(bpm);
-                                      isScanning = false;
-                                      
-                                      try {
-                                          ProcessCameraProvider.getInstance(MainActivity.this).get().unbindAll();
-                                      } catch(Exception e){}
-                                  }
-                              });
-                          }
-                      }
-                  }
-                  lastRedAvg = redAvg;
-              }
-
-              private void updateAIAdvice(int bpm) {
-                  String advice;
-                  if (bpm < 60) {
-                      advice = isHindi ? "Aapki dharkan slow hai. Thoda movement karein." : "Heart rate is low. Please move around.";
-                  } else if (bpm <= 100) {
-                      advice = isHindi ? "Aap bilkul fit hain, kaam jari rakhein!" : "You are completely fit, keep up the good work!";
-                  } else {
-                      advice = isHindi ? "Dharkan tez hai, thoda paani pee lein aur rest karein." : "Heart rate is high, drink some water and rest.";
-                  }
-                  
-                  aiStatus.setText("AI: " + advice);
-                  speakOut(advice);
-              }
-
-              private void saveToHistory(int bpm) {
-                  String time = new SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault()).format(new Date());
-                  String old = sharedPrefs.getString("data", "");
-                  sharedPrefs.edit().putString("data", time + " -> " + bpm + " BPM\n\n" + old).apply();
-              }
-
-              private void speakOut(String text) {
-                  if(tts != null) {
-                      tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
-                  }
-              }
-
-              @Override
-              protected void onDestroy() {
-                  if (tts != null) { tts.stop(); tts.shutdown(); }
-                  if (speechRecognizer != null) { speechRecognizer.destroy(); }
-                  super.onDestroy();
+              private void save() {
+                  prefs.edit().putInt("dollars", dollars).putInt("mission", mission).putBoolean("shotgun", hasShotgun).apply();
               }
           }
           EOF
 
-      - name: 9. Compile Code & Build APK
+      - name: 8. Build Ultimate Game APK
         run: |
           gradle wrapper --gradle-version 8.4
           chmod +x gradlew
           ./gradlew assembleDebug --info
 
-      - name: 10. Upload Ultimate Pro Max APK
+      - name: 9. Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: ZPlus3-Ultimate-Master-Fix
+          name: ZPlus3-Zombie-Ultimate-Pro
           path: app/build/outputs/apk/debug/*.apk

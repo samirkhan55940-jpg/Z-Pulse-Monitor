@@ -1,4 +1,4 @@
-name: Z+3 AI Voice Pro Max (Master Fix)
+name: Z+3 AI Voice Pro Max (Final Kotlin Fix)
 
 on:
   push:
@@ -15,7 +15,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 2. Create All Project Folders (With Mipmap for Icon)
+      - name: 2. Create All Project Folders
         run: |
           mkdir -p app/src/main/java/com/zeeshan/pulse
           mkdir -p app/src/main/res/values
@@ -37,19 +37,19 @@ jobs:
           }
           EOF
 
-          # GitHub Server ki RAM 4GB tak limit ki hai taake OOM Error na aaye
           echo "org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8" > gradle.properties
           echo "android.useAndroidX=true" >> gradle.properties
           echo "android.enableJetifier=true" >> gradle.properties
 
-      - name: 4. Download Dummy App Icon (AAPT2 Fix)
+      - name: 4. Download Dummy App Icon
         run: |
           wget -q "https://raw.githubusercontent.com/google/material-design-icons/master/png/hardware/memory/materialicons/24dp/2x/baseline_memory_black_24dp.png" -O app/src/main/res/mipmap-xxhdpi/ic_launcher.png
 
-      - name: 5. Write App Build Configuration
+      - name: 5. Write App Build Config (KOTLIN KILLER ADDED)
         run: |
           cat << 'EOF' > app/build.gradle
           apply plugin: 'com.android.application'
+          
           android {
               namespace 'com.zeeshan.pulse'
               compileSdk 34
@@ -57,15 +57,29 @@ jobs:
                   applicationId "com.zeeshan.pulse"
                   minSdk 24
                   targetSdk 34
-                  versionCode 12
-                  versionName "Z+3 Ultimate Fixed"
+                  versionCode 16
+                  versionName "Z+3 Supreme Final"
               }
               compileOptions {
                   sourceCompatibility JavaVersion.VERSION_1_8
                   targetCompatibility JavaVersion.VERSION_1_8
               }
-              lint { abortOnError false } 
+              lint { abortOnError false }
+              
+              packagingOptions {
+                  pickFirst 'META-INF/**'
+                  pickFirst '**/*.so'
+                  pickFirst '**/*.kotlin_module'
+                  exclude 'META-INF/DEPENDENCIES'
+              }
           }
+          
+          // YEH HISSA DUPLICATE KOTLIN FILES KO BAHAR NIKAL DEGA
+          configurations.all {
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+          }
+          
           dependencies { 
               implementation 'androidx.appcompat:appcompat:1.6.1'
               implementation "androidx.camera:camera-camera2:1.3.0"
@@ -84,7 +98,7 @@ jobs:
           </resources>
           EOF
 
-      - name: 7. Write AndroidManifest (Icon & Permissions)
+      - name: 7. Write AndroidManifest (Permissions & TV Mode)
         run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <?xml version="1.0" encoding="utf-8"?>
@@ -110,7 +124,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: 8. Write MainActivity.java (All Features Included)
+      - name: 8. Write MainActivity.java (THE FULL LOGIC - NO CUTS)
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/pulse/MainActivity.java
           package com.zeeshan.pulse;
@@ -421,4 +435,3 @@ jobs:
         with:
           name: ZPlus3-Ultimate-Master-Fix
           path: app/build/outputs/apk/debug/*.apk
-

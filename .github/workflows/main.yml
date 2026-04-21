@@ -1,4 +1,4 @@
-name: Build Z+3 Zombie Ultimate Pro (Master Fix)
+name: Build Zeeshan Husain Chat (Premium Edition)
 
 on:
   push:
@@ -9,250 +9,303 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 1. Setup JDK 17
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 2. Create Project Folders
+      - name: Create Premium App Structure
         run: |
-          mkdir -p app/src/main/java/com/zeeshan/zombie
+          mkdir -p app/src/main/java/com/zeeshan/chat/db
           mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/mipmap-xxhdpi
-          mkdir -p app/src/main/cpp
-
-      - name: 3. Setup Android System Files (RAM Fix)
-        run: |
-          cat << 'EOF' > settings.gradle
-          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
-          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS); repositories { google(); mavenCentral() } }
-          rootProject.name = "ZZombieUltimate"
-          include ':app'
-          EOF
-
-          cat << 'EOF' > build.gradle
-          buildscript {
-              repositories { google(); mavenCentral() }
-              dependencies { classpath 'com.android.tools.build:gradle:8.2.0' }
-          }
-          EOF
-
-          echo "org.gradle.jvmargs=-Xmx4g -Dfile.encoding=UTF-8" > gradle.properties
-          echo "android.useAndroidX=true" >> gradle.properties
-          echo "android.enableJetifier=true" >> gradle.properties
-
-      - name: 4. Write App Build Configuration (Clash Fix)
-        run: |
+          mkdir -p app/src/main/res/layout
+          mkdir -p app/src/main/res/menu
+          mkdir -p app/src/main/res/drawable
+          
+          # 1. Gradle Config (Powerful & Optimized)
           cat << 'EOF' > app/build.gradle
-          apply plugin: 'com.android.application'
+          plugins { id 'com.android.application' }
           android {
-              namespace 'com.zeeshan.zombie'
+              namespace 'com.zeeshan.chat'
               compileSdk 34
               defaultConfig {
-                  applicationId "com.zeeshan.zombie"
-                  minSdk 24
+                  applicationId 'com.zeeshan.chat'
+                  minSdk 26
                   targetSdk 34
-                  versionCode 24
-                  versionName "24-Mission-Pro"
-                  externalNativeBuild { cmake { cppFlags "" } }
-                  ndk { abiFilters 'arm64-v8a' }
+                  versionCode 5
+                  versionName "5.0-Premium"
               }
-              externalNativeBuild { cmake { path "src/main/cpp/CMakeLists.txt" } }
-              packagingOptions {
-                  pickFirst 'META-INF/**'
-                  pickFirst '**/*.kotlin_module'
-              }
+              compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
           }
-          configurations.all {
-              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
-          }
-          dependencies { implementation 'androidx.appcompat:appcompat:1.6.1' }
-          EOF
-
-      - name: 5. Write 3D Weather Engine (C++)
-        run: |
-          cat << 'EOF' > app/src/main/cpp/CMakeLists.txt
-          cmake_minimum_required(VERSION 3.22.1)
-          project("zombie_engine")
-          add_library(zombie_engine SHARED native-lib.cpp)
-          find_library(log-lib log)
-          find_library(gles-lib GLESv3)
-          target_link_libraries(zombie_engine ${log-lib} ${gles-lib})
-          EOF
-
-          cat << 'EOF' > app/src/main/cpp/native-lib.cpp
-          #include <jni.h>
-          #include <GLES3/gl3.h>
-          extern "C" JNIEXPORT void JNICALL
-          Java_com_zeeshan_zombie_MainActivity_update3DEnvironment(JNIEnv* env, jobject obj, jint type) {
-              if (type == 1) glClearColor(0.1f, 0.1f, 0.3f, 1.0f); // Rain
-              else if (type == 2) glClearColor(0.4f, 0.1f, 0.0f, 1.0f); // Heat
-              else glClearColor(0.7f, 0.7f, 0.9f, 1.0f); // Snow
-              glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'com.google.android.material:material:1.9.0'
+              implementation 'androidx.cardview:cardview:1.0.0'
+              implementation 'androidx.room:room-runtime:2.6.1'
+              annotationProcessor 'androidx.room:room-compiler:2.6.1'
           }
           EOF
 
-      - name: 6. Write Strings & Manifest (Permissions Added)
-        run: |
-          echo '<resources><string name="app_name">Z+³ Zombie Pro 24</string></resources>' > app/src/main/res/values/strings.xml
+          # 2. Database Models (Strong Backend)
+          cat << 'EOF' > app/src/main/java/com/zeeshan/chat/db/Message.java
+          package com.zeeshan.chat.db;
+          import androidx.room.*;
+          @Entity(tableName = "messages")
+          public class Message {
+              @PrimaryKey(autoGenerate = true) public int id;
+              public String sender;
+              public String text;
+              public long timestamp;
+              public Message(String sender, String text) { this.sender = sender; this.text = text; this.timestamp = System.currentTimeMillis(); }
+          }
+          EOF
           
-          cat << 'EOF' > app/src/main/AndroidManifest.xml
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.CAMERA" />
-              <uses-permission android:name="android.permission.RECORD_AUDIO" />
-              <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-              <application android:label="Z+³ Zombie Pro" android:theme="@style/Theme.AppCompat.NoActionBar">
-                  <activity android:name=".MainActivity" android:exported="true" android:screenOrientation="landscape">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
+          cat << 'EOF' > app/src/main/java/com/zeeshan/chat/db/MessageDao.java
+          package com.zeeshan.chat.db;
+          import androidx.room.*;
+          import java.util.List;
+          @Dao
+          public interface MessageDao {
+              @Insert void insert(Message message);
+              @Query("SELECT * FROM messages ORDER BY timestamp ASC") List<Message> getAllMessages();
+              @Query("DELETE FROM messages") void deleteAll();
+          }
+          EOF
+          
+          cat << 'EOF' > app/src/main/java/com/zeeshan/chat/db/AppDatabase.java
+          package com.zeeshan.chat.db;
+          import androidx.room.*;
+          @Database(entities = {Message.class}, version = 1)
+          public abstract class AppDatabase extends RoomDatabase { public abstract MessageDao messageDao(); }
           EOF
 
-      - name: 7. Write MainActivity.java (THE COMPLETE LOGIC)
-        run: |
-          cat << 'EOF' > app/src/main/java/com/zeeshan/zombie/MainActivity.java
-          package com.zeeshan.zombie;
+          # 3. Premium UI Drawables (Chat Bubbles)
+          cat << 'EOF' > app/src/main/res/drawable/bg_chat_me.xml
+          <shape xmlns:android="http://schemas.android.com/apk/res/android">
+              <solid android:color="#E3FFC4"/>
+              <corners android:topLeftRadius="24dp" android:topRightRadius="24dp" android:bottomLeftRadius="24dp" android:bottomRightRadius="4dp"/>
+              <stroke android:width="1dp" android:color="#C5E1A5"/>
+          </shape>
+          EOF
+          
+          cat << 'EOF' > app/src/main/res/drawable/bg_input.xml
+          <shape xmlns:android="http://schemas.android.com/apk/res/android">
+              <solid android:color="#FFFFFF"/>
+              <corners android:radius="30dp"/>
+              <stroke android:width="1dp" android:color="#B0BEC5"/>
+          </shape>
+          EOF
 
-          import android.Manifest;
-          import android.content.SharedPreferences;
-          import android.content.pm.PackageManager;
-          import android.graphics.Color;
-          import android.os.Bundle;
-          import android.view.View;
+          # 4. Colorful Values (Themes)
+          cat << 'EOF' > app/src/main/res/values/colors.xml
+          <resources>
+              <color name="colorPrimary">#00897B</color>
+              <color name="colorPrimaryDark">#00695C</color>
+              <color name="colorAccent">#FFC107</color>
+              <color name="chatBackground">#F5F5F5</color>
+          </resources>
+          EOF
+
+          # 5. Pro Layouts
+          cat << 'EOF' > app/src/main/res/layout/item_chat.xml
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="vertical"
+              android:padding="8dp">
+              <LinearLayout android:id="@+id/bubble_layout"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_gravity="end"
+                  android:background="@drawable/bg_chat_me"
+                  android:padding="12dp"
+                  android:elevation="2dp">
+                  <TextView android:id="@+id/msg_text"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:textColor="#212121"
+                      android:textSize="16sp"
+                      android:textStyle="bold"/>
+              </LinearLayout>
+          </LinearLayout>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              android:background="@color/chatBackground">
+              
+              <androidx.appcompat.widget.Toolbar
+                  android:id="@+id/toolbar"
+                  android:layout_width="match_parent"
+                  android:layout_height="?attr/actionBarSize"
+                  android:background="@color/colorPrimary"
+                  android:elevation="8dp"
+                  app:titleTextColor="#FFFFFF"
+                  app:subtitleTextColor="#E0F2F1"
+                  android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
+                  
+              <ListView android:id="@+id/chat_list"
+                  android:layout_width="match_parent"
+                  android:layout_height="0dp"
+                  android:layout_weight="1"
+                  android:divider="@android:color/transparent"
+                  android:dividerHeight="8dp"
+                  android:padding="8dp"
+                  android:clipToPadding="false"
+                  android:transcriptMode="alwaysScroll"
+                  android:stackFromBottom="true" />
+                  
+              <LinearLayout android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:orientation="horizontal"
+                  android:padding="10dp"
+                  android:gravity="bottom">
+                  
+                  <EditText android:id="@+id/msg_input"
+                      android:layout_width="0dp"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:background="@drawable/bg_input"
+                      android:hint="Type a message..."
+                      android:padding="14dp"
+                      android:maxLines="4"
+                      android:elevation="2dp"/>
+                      
+                  <com.google.android.material.floatingactionbutton.FloatingActionButton
+                      android:id="@+id/send_btn"
+                      android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:layout_marginStart="8dp"
+                      android:src="@android:drawable/ic_menu_send"
+                      app:backgroundTint="@color/colorPrimary"
+                      app:tint="#FFFFFF"
+                      app:fabSize="normal" />
+              </LinearLayout>
+          </LinearLayout>
+          EOF
+
+          # 6. Menu for Memory Management
+          cat << 'EOF' > app/src/main/res/menu/main_menu.xml
+          <menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
+              <item android:id="@+id/clear_history" android:title="Delete All Chats" app:showAsAction="never" />
+              <item android:id="@+id/clear_cache" android:title="Boost Phone (Clear MB)" app:showAsAction="never" />
+          </menu>
+          EOF
+
+          # 7. Custom Adapter & Main Logic (The Brain)
+          cat << 'EOF' > app/src/main/java/com/zeeshan/chat/MainActivity.java
+          package com.zeeshan.chat;
+          import android.content.Context;
+          import android.os.*;
+          import android.view.*;
           import android.widget.*;
+          import androidx.annotation.NonNull;
           import androidx.appcompat.app.AppCompatActivity;
-          import androidx.core.app.ActivityCompat;
-          import androidx.core.content.ContextCompat;
+          import androidx.appcompat.widget.Toolbar;
+          import androidx.room.Room;
+          import com.zeeshan.chat.db.*;
+          import java.io.File;
+          import java.util.*;
 
           public class MainActivity extends AppCompatActivity {
-              private int dollars = 0, mission = 1, kills = 0, health = 100;
-              private boolean hasShotgun = false;
-              private TextView hud, weatherText;
-              private SharedPreferences prefs;
-
-              static { System.loadLibrary("zombie_engine"); }
-              public native void update3DEnvironment(int type);
+              private ArrayList<Message> chatList = new ArrayList<>();
+              private ChatAdapter adapter;
+              private AppDatabase db;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-                  prefs = getSharedPreferences("ZSave", MODE_PRIVATE);
-                  dollars = prefs.getInt("dollars", 0);
-                  mission = prefs.getInt("mission", 1);
-                  hasShotgun = prefs.getBoolean("shotgun", false);
+                  setContentView(R.layout.activity_main);
 
-                  // Ijaajat (Permission) Request System
-                  checkGamePermissions();
+                  Toolbar toolbar = findViewById(R.id.toolbar);
+                  setSupportActionBar(toolbar);
+                  getSupportActionBar().setTitle("Aasan Chatting");
+                  getSupportActionBar().setSubtitle("By Zeeshan Husain & Gemini");
 
-                  RelativeLayout root = new RelativeLayout(this);
-                  root.setBackgroundColor(Color.BLACK);
+                  db = Room.databaseBuilder(this, AppDatabase.class, "zeeshan_premium_db").allowMainThreadQueries().build();
+                  
+                  ListView listView = findViewById(R.id.chat_list);
+                  adapter = new ChatAdapter(this, chatList);
+                  listView.setAdapter(adapter);
 
-                  weatherText = new TextView(this);
-                  weatherText.setTextColor(Color.CYAN);
-                  root.addView(weatherText);
+                  loadChat();
 
-                  hud = new TextView(this);
-                  hud.setTextColor(Color.YELLOW);
-                  hud.setTextSize(18);
-                  hud.setPadding(30, 100, 30, 30);
-                  updateHUD();
-                  root.addView(hud);
-
-                  Button btnShoot = new Button(this);
-                  btnShoot.setText("🔥 OPEN FIRE");
-                  btnShoot.setBackgroundColor(Color.RED);
-                  btnShoot.setTextColor(Color.WHITE);
-                  setupButton(btnShoot, 300);
-                  root.addView(btnShoot);
-
-                  Button btnShop = new Button(this);
-                  btnShop.setText(hasShotgun ? "SHOTGUN EQUIPPED" : "BUY SHOTGUN ($10)");
-                  btnShop.setBackgroundColor(Color.BLUE);
-                  btnShop.setTextColor(Color.WHITE);
-                  setupButton(btnShop, 100);
-                  root.addView(btnShop);
-
-                  btnShoot.setOnClickListener(v -> {
-                      if(health <= 0) {
-                          Toast.makeText(this, "You Died! Mission Restart.", Toast.LENGTH_SHORT).show();
-                          health = 100; updateHUD(); return;
-                      }
-                      
-                      kills += (hasShotgun ? 2 : 1);
-                      if(mission >= 5) {
-                          health -= (mission > 15 ? 5 : 2); // Harder levels = More damage
-                          Toast.makeText(this, "Zombies are shooting back!", Toast.LENGTH_SHORT).show();
-                      }
-
-                      if(kills >= (mission * 4)) completeMission();
-                      updateHUD();
-                      applyWeather();
-                  });
-
-                  btnShop.setOnClickListener(v -> {
-                      if(!hasShotgun && dollars >= 10) {
-                          dollars -= 10; hasShotgun = true;
-                          save(); btnShop.setText("SHOTGUN EQUIPPED"); updateHUD();
+                  findViewById(R.id.send_btn).setOnClickListener(v -> {
+                      EditText input = findViewById(R.id.msg_input);
+                      String text = input.getText().toString().trim();
+                      if(!text.isEmpty()){
+                          db.messageDao().insert(new Message("Me", text));
+                          input.setText("");
+                          loadChat();
                       }
                   });
-
-                  setContentView(root);
-                  applyWeather();
               }
 
-              private void checkGamePermissions() {
-                  String[] permissions = {Manifest.permission.CAMERA, Manifest.permission.RECORD_AUDIO};
-                  if (ContextCompat.checkSelfPermission(this, permissions[0]) != PackageManager.PERMISSION_GRANTED) {
-                      ActivityCompat.requestPermissions(this, permissions, 100);
+              private void loadChat() {
+                  chatList.clear();
+                  chatList.addAll(db.messageDao().getAllMessages());
+                  adapter.notifyDataSetChanged();
+              }
+
+              @Override
+              public boolean onCreateOptionsMenu(Menu menu) {
+                  getMenuInflater().inflate(R.menu.main_menu, menu);
+                  return true;
+              }
+
+              @Override
+              public boolean onOptionsItemSelected(MenuItem item) {
+                  if(item.getItemId() == R.id.clear_history) {
+                      db.messageDao().deleteAll();
+                      loadChat();
+                      Toast.makeText(this, "History Saaf Ho Gayi!", Toast.LENGTH_SHORT).show();
+                  } else if(item.getItemId() == R.id.clear_cache) {
+                      try {
+                          File dir = getCacheDir();
+                          if (dir != null && dir.isDirectory()) deleteDir(dir);
+                          Toast.makeText(this, "Phone Boosted!", Toast.LENGTH_SHORT).show();
+                      } catch (Exception e) {}
                   }
+                  return super.onOptionsItemSelected(item);
               }
-
-              private void setupButton(Button b, int bottom) {
-                  RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(-1, 150);
-                  lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
-                  lp.setMargins(50, 0, 50, bottom);
-                  b.setLayoutParams(lp);
-              }
-
-              private void applyWeather() {
-                  int t;
-                  if (mission <= 8) { t = 1; weatherText.setText("MAP: RAINY FACTORY"); }
-                  else if (mission <= 16) { t = 2; weatherText.setText("MAP: HOT DESERT"); }
-                  else { t = 3; weatherText.setText("MAP: SNOWY MOUNTAIN"); }
-                  update3DEnvironment(t);
-              }
-
-              private void completeMission() {
-                  if(mission < 24) {
-                      dollars += 2; mission++; kills = 0;
-                      save();
-                      Toast.makeText(this, "Mission Clear! +$2", Toast.LENGTH_SHORT).show();
+              
+              private boolean deleteDir(File dir) {
+                  if (dir != null && dir.isDirectory()) {
+                      for (String child : dir.list()) if (!deleteDir(new File(dir, child))) return false;
                   }
+                  return dir.delete();
               }
 
-              private void updateHUD() {
-                  hud.setText("MISSION: " + mission + "/24\nHEALTH: " + health + "%\nCASH: $" + dollars + "\nGUN: " + (hasShotgun ? "SHOTGUN" : "PISTOL"));
-              }
-
-              private void save() {
-                  prefs.edit().putInt("dollars", dollars).putInt("mission", mission).putBoolean("shotgun", hasShotgun).apply();
+              // Custom Adapter for Premium Bubbles
+              class ChatAdapter extends ArrayAdapter<Message> {
+                  public ChatAdapter(Context context, List<Message> messages) { super(context, 0, messages); }
+                  @NonNull @Override
+                  public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                      if (convertView == null) convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_chat, parent, false);
+                      Message msg = getItem(position);
+                      TextView txt = convertView.findViewById(R.id.msg_text);
+                      txt.setText(msg.text);
+                      return convertView;
+                  }
               }
           }
           EOF
 
-      - name: 8. Build Ultimate Game APK
+      - name: Build Final Pro APK
         run: |
-          gradle wrapper --gradle-version 8.4
-          chmod +x gradlew
-          ./gradlew assembleDebug --info
+          chmod +x gradlew || true
+          ./gradlew assembleDebug
 
-      - name: 9. Upload APK
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ZPlus3-Zombie-Ultimate-Pro
-          path: app/build/outputs/apk/debug/*.apk
+          name: Zeeshan-Husain-Pro-Chat
+          path: app/build/outputs/apk/debug/app-debug.apk

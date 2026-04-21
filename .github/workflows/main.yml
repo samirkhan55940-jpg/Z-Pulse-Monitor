@@ -299,9 +299,11 @@ jobs:
           }
           EOF
 
-      - name: Build Final Pro APK
+      # Yahan mene NAYA command add kiya hai jo aapke error ko theek karega
+      - name: Generate Gradle Wrapper & Build Pro APK
         run: |
-          chmod +x gradlew || true
+          gradle wrapper --gradle-version 8.4
+          chmod +x gradlew
           ./gradlew assembleDebug
 
       - name: Upload Artifact

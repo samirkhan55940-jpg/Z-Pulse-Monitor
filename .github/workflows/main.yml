@@ -18,10 +18,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 1. Generate Gradle Wrapper
-        run: gradle wrapper --gradle-version 8.4
-
-      - name: 2. Setup Root Files
+      - name: 1. Setup Root Files (FIX: Files pehle banayenge)
         run: |
           cat << 'EOF' > settings.gradle
           pluginManagement {
@@ -40,6 +37,9 @@ jobs:
               id 'com.android.application' version '8.3.0' apply false
           }
           EOF
+
+      - name: 2. Generate Gradle Wrapper (FIX: Ab wrapper run karenge)
+        run: gradle wrapper --gradle-version 8.4
 
       - name: 3. Setup App Folders
         run: |
@@ -70,7 +70,7 @@ jobs:
           }
           EOF
 
-      - name: 5. Themes, Colors & Drawables (Crash Fix)
+      - name: 5. Themes, Colors & Drawables
         run: |
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <resources>
@@ -161,7 +161,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: 8. Write Math Engine (Java - Fully Wired)
+      - name: 8. Write Math Engine (Java)
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
           package com.zeeshan.calculator;
@@ -186,7 +186,6 @@ jobs:
                   setContentView(R.layout.activity_main);
                   display = findViewById(R.id.tv_display);
 
-                  // TTS Setup
                   tts = new TextToSpeech(this, status -> {
                       if (status == TextToSpeech.SUCCESS) {
                           tts.setLanguage(new Locale("en", "IN"));
@@ -195,7 +194,6 @@ jobs:
                       }
                   });
 
-                  // Button Linker Logic (Fixes buttons not working)
                   GridLayout grid = findViewById(R.id.grid_layout);
                   for (int i = 0; i < grid.getChildCount(); i++) {
                       View child = grid.getChildAt(i);

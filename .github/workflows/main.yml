@@ -1,4 +1,4 @@
-name: Zeeshan Husain Master Build (Premium Offline Chat)
+name: Build Zeeshan Husain Smile Pro Calculator
 
 on:
   push:
@@ -18,75 +18,106 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Master Script - Ek File Se Poori App Banana
+      - name: 1. Setup App Folders
         run: |
-          echo "=== STEP 1: NEEV BANANA (ROOT FILES) ==="
-          
-          cat << 'EOF' > settings.gradle
-          pluginManagement { repositories { google(); mavenCentral(); gradlePluginPortal() } }
-          dependencyResolutionManagement { repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS); repositories { google(); mavenCentral() } }
-          include ':app'
-          EOF
-
-          cat << 'EOF' > build.gradle
-          plugins { id 'com.android.application' version '8.2.0' apply false }
-          EOF
-
-          cat << 'EOF' > gradle.properties
-          android.useAndroidX=true
-          android.enableJetifier=true
-          EOF
-          
-          echo "=== STEP 2: GRADLE ENGINE BULANA ==="
-          gradle wrapper --gradle-version 8.4
-          
-          echo "=== STEP 3: FOLDERS BANANA ==="
-          mkdir -p app/src/main/java/com/zeeshan/chat/db
+          mkdir -p app/src/main/java/com/zeeshan/calculator
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/menu
           mkdir -p app/src/main/res/drawable
-          
-          echo "=== STEP 4: APP KI CODING LIKHNA ==="
-          
-          # 4.1 App Build Config
+
+      - name: 2. Write Build & Config
+        run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
           android {
-              namespace 'com.zeeshan.chat'
+              namespace 'com.zeeshan.calculator'
               compileSdk 34
               defaultConfig {
-                  applicationId 'com.zeeshan.chat'
+                  applicationId 'com.zeeshan.calculator'
                   minSdk 26
                   targetSdk 34
-                  versionCode 7
-                  versionName "7.0-HardwareUnlocked"
+                  versionCode 1
+                  versionName "1.0-Voice-Premium"
               }
               compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
           }
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.6.1'
               implementation 'com.google.android.material:material:1.9.0'
-              implementation 'androidx.room:room-runtime:2.6.1'
-              annotationProcessor 'androidx.room:room-compiler:2.6.1'
           }
           EOF
 
-          # 4.2 Permissions (Manifest - SAARI IJAAJATEIN YAHAN HAIN)
-          cat << 'EOF' > app/src/main/AndroidManifest.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-              <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-              <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" />
-              
-              <uses-permission android:name="android.permission.RECORD_AUDIO" />
-              
-              <uses-permission android:name="android.permission.WAKE_LOCK" />
-              <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+          cat << 'EOF' > app/src/main/res/values/colors.xml
+          <resources>
+              <color name="bg_color">#2C3333</color>
+              <color name="btn_color">#395B64</color>
+              <color name="text_color">#E7F6F2</color>
+              <color name="accent_color">#F582A7</color>
+          </resources>
+          EOF
 
-              <application android:label="Aasan Chatting" android:theme="@style/Theme.Material3.DayNight.NoActionBar">
+      - name: 3. Design Neumorphic Buttons
+        run: |
+          cat << 'EOF' > app/src/main/res/drawable/bg_button.xml
+          <shape xmlns:android="http://schemas.android.com/apk/res/android">
+              <solid android:color="@color/btn_color"/>
+              <corners android:radius="16dp"/>
+              <stroke android:width="1dp" android:color="#5A7D8A"/>
+          </shape>
+          EOF
+
+      - name: 4. Create UI Layout (All Buttons)
+        run: |
+          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent" android:layout_height="match_parent"
+              android:orientation="vertical" android:background="@color/bg_color" android:padding="16dp">
+              
+              <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:text="Zeeshan Husain Smile AI Calc" android:textColor="@color/accent_color"
+                  android:textSize="14sp" android:textStyle="bold" android:gravity="center" android:padding="8dp"/>
+
+              <TextView android:id="@+id/tv_display"
+                  android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
+                  android:gravity="bottom|end" android:text="0" android:textColor="@color/text_color"
+                  android:textSize="56sp" android:padding="16dp" android:maxLines="2" android:autoSizeTextType="uniform"/>
+
+              <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                  android:columnCount="4" android:rowCount="5" android:useDefaultMargins="true" android:alignmentMode="alignBounds">
+                  
+                  <Button android:text="AC" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="(" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text=")" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="/" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+
+                  <Button android:text="7" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="8" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="9" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="*" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+
+                  <Button android:text="4" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="5" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="6" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="-" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+
+                  <Button android:text="1" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="2" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="3" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="+" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+
+                  <Button android:text="0" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnSpan="2" android:layout_columnWeight="2" android:layout_margin="4dp"/>
+                  <Button android:text="." android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="=" android:onClick="onButtonClick" android:backgroundTint="@color/accent_color" android:textColor="@color/bg_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+              </GridLayout>
+          </LinearLayout>
+          EOF
+
+      - name: 5. Write AndroidManifest
+        run: |
+          cat << 'EOF' > app/src/main/AndroidManifest.xml
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <queries><intent><action android:name="android.intent.action.TTS_SERVICE" /></intent></queries>
+              <application android:label="ZH Calc" android:theme="@style/Theme.AppCompat.Light.NoActionBar">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -97,179 +128,119 @@ jobs:
           </manifest>
           EOF
 
-          # 4.3 Database System
-          cat << 'EOF' > app/src/main/java/com/zeeshan/chat/db/Message.java
-          package com.zeeshan.chat.db;
-          import androidx.room.*;
-          @Entity(tableName = "messages")
-          public class Message {
-              @PrimaryKey(autoGenerate = true) public int id;
-              public String sender; public String text; public long timestamp;
-              public Message(String sender, String text) { this.sender = sender; this.text = text; this.timestamp = System.currentTimeMillis(); }
-          }
-          EOF
-          
-          cat << 'EOF' > app/src/main/java/com/zeeshan/chat/db/MessageDao.java
-          package com.zeeshan.chat.db;
-          import androidx.room.*;
-          import java.util.List;
-          @Dao public interface MessageDao {
-              @Insert void insert(Message message);
-              @Query("SELECT * FROM messages ORDER BY timestamp ASC") List<Message> getAllMessages();
-              @Query("DELETE FROM messages") void deleteAll();
-          }
-          EOF
-          
-          cat << 'EOF' > app/src/main/java/com/zeeshan/chat/db/AppDatabase.java
-          package com.zeeshan.chat.db;
-          import androidx.room.*;
-          @Database(entities = {Message.class}, version = 1)
-          public abstract class AppDatabase extends RoomDatabase { public abstract MessageDao messageDao(); }
-          EOF
-
-          # 4.4 Colorful Themes & Drawables
-          cat << 'EOF' > app/src/main/res/values/colors.xml
-          <resources>
-              <color name="colorPrimary">#00897B</color>
-              <color name="chatBackground">#ECE5DD</color>
-              <color name="bubbleColor">#DCF8C6</color>
-          </resources>
-          EOF
-
-          cat << 'EOF' > app/src/main/res/drawable/bg_chat_me.xml
-          <shape xmlns:android="http://schemas.android.com/apk/res/android">
-              <solid android:color="@color/bubbleColor"/>
-              <corners android:topLeftRadius="20dp" android:topRightRadius="20dp" android:bottomLeftRadius="20dp" android:bottomRightRadius="2dp"/>
-          </shape>
-          EOF
-
-          cat << 'EOF' > app/src/main/res/drawable/bg_input.xml
-          <shape xmlns:android="http://schemas.android.com/apk/res/android">
-              <solid android:color="#FFFFFF"/>
-              <corners android:radius="30dp"/>
-          </shape>
-          EOF
-
-          # 4.5 Layouts (Unique WhatsApp Design)
-          cat << 'EOF' > app/src/main/res/layout/item_chat.xml
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="6dp">
-              <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="end"
-                  android:background="@drawable/bg_chat_me" android:padding="12dp" android:elevation="2dp">
-                  <TextView android:id="@+id/msg_text" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                      android:textColor="#000000" android:textSize="16sp" android:textStyle="bold"/>
-              </LinearLayout>
-          </LinearLayout>
-          EOF
-
-          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:background="@color/chatBackground">
-              <androidx.appcompat.widget.Toolbar android:id="@+id/toolbar" android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
-                  android:background="@color/colorPrimary" app:titleTextColor="#FFFFFF" app:subtitleTextColor="#E0F2F1" android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
-              <ListView android:id="@+id/chat_list" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
-                  android:divider="@android:color/transparent" android:dividerHeight="8dp" android:padding="8dp" android:transcriptMode="alwaysScroll" android:stackFromBottom="true" />
-              <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="8dp" android:gravity="bottom">
-                  <EditText android:id="@+id/msg_input" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                      android:background="@drawable/bg_input" android:hint="Type message..." android:padding="12dp" android:elevation="1dp"/>
-                  <com.google.android.material.floatingactionbutton.FloatingActionButton android:id="@+id/send_btn" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                      android:layout_marginStart="8dp" android:src="@android:drawable/ic_menu_send" app:backgroundTint="@color/colorPrimary" app:tint="#FFFFFF" app:fabSize="normal" />
-              </LinearLayout>
-          </LinearLayout>
-          EOF
-
-          cat << 'EOF' > app/src/main/res/menu/main_menu.xml
-          <menu xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto">
-              <item android:id="@+id/clear_history" android:title="Delete History" app:showAsAction="never" />
-              <item android:id="@+id/clear_cache" android:title="MB Khali Karein" app:showAsAction="never" />
-          </menu>
-          EOF
-
-          # 4.6 The Brain (Java Logic with Permissions Popups)
-          cat << 'EOF' > app/src/main/java/com/zeeshan/chat/MainActivity.java
-          package com.zeeshan.chat;
-          import android.content.Context; import android.content.Intent; import android.net.Uri; import android.os.*; 
-          import android.view.*; import android.widget.*; import android.provider.Settings;
-          import androidx.annotation.NonNull; import androidx.appcompat.app.AppCompatActivity; import androidx.appcompat.widget.Toolbar;
-          import androidx.core.app.ActivityCompat; import androidx.room.Room; 
-          import com.zeeshan.chat.db.*; import java.io.File; import java.util.*;
+      - name: 6. Write Math Engine & Voice Logic (Java)
+        run: |
+          cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
+          package com.zeeshan.calculator;
+          import android.os.Bundle;
+          import android.speech.tts.TextToSpeech;
+          import android.view.View;
+          import android.widget.Button;
+          import android.widget.TextView;
+          import androidx.appcompat.app.AppCompatActivity;
+          import java.util.Locale;
 
           public class MainActivity extends AppCompatActivity {
-              private ArrayList<Message> chatList = new ArrayList<>(); private ChatAdapter adapter; private AppDatabase db;
-              
-              @Override protected void onCreate(Bundle savedInstanceState) {
-                  super.onCreate(savedInstanceState); setContentView(R.layout.activity_main);
-                  
-                  Toolbar toolbar = findViewById(R.id.toolbar); setSupportActionBar(toolbar);
-                  getSupportActionBar().setTitle("Aasan Chatting"); 
-                  getSupportActionBar().setSubtitle("By Zeeshan Husain & Gemini");
+              private TextToSpeech tts;
+              private TextView display;
+              private StringBuilder currentExpression = new StringBuilder();
 
-                  // === IJAAJAT (PERMISSIONS) MANGNE KA SYSTEM ===
-                  checkAndRequestPermissions();
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+                  setContentView(R.layout.activity_main);
+                  display = findViewById(R.id.tv_display);
 
-                  db = Room.databaseBuilder(this, AppDatabase.class, "zeeshan_master_db").allowMainThreadQueries().build();
-                  ListView listView = findViewById(R.id.chat_list);
-                  adapter = new ChatAdapter(this, chatList); listView.setAdapter(adapter);
-                  loadChat();
-
-                  findViewById(R.id.send_btn).setOnClickListener(v -> {
-                      EditText input = findViewById(R.id.msg_input); String text = input.getText().toString().trim();
-                      if(!text.isEmpty()){ db.messageDao().insert(new Message("Me", text)); input.setText(""); loadChat(); }
+                  tts = new TextToSpeech(this, status -> {
+                      if (status == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("en", "IN"));
                   });
               }
 
-              private void checkAndRequestPermissions() {
-                  // 1. Mike aur Location ki ijaajat
-                  String[] perms = {android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.ACCESS_FINE_LOCATION};
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                      perms = new String[]{android.Manifest.permission.RECORD_AUDIO, android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.NEARBY_WIFI_DEVICES};
-                  }
-                  ActivityCompat.requestPermissions(this, perms, 1);
+              public void onButtonClick(View view) {
+                  Button button = (Button) view;
+                  String btnText = button.getText().toString();
 
-                  // 2. Hardware Makkhan System (Battery Ignore Ijaajat)
-                  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                      PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
-                      if (!pm.isIgnoringBatteryOptimizations(getPackageName())) {
-                          Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
-                          intent.setData(Uri.parse("package:" + getPackageName()));
-                          startActivity(intent);
+                  if (btnText.equals("AC")) {
+                      currentExpression.setLength(0);
+                      display.setText("0");
+                  } else if (btnText.equals("=")) {
+                      calculateResult();
+                  } else {
+                      if (display.getText().toString().equals("0") || display.getText().toString().equals("Error")) {
+                          currentExpression.setLength(0);
                       }
+                      currentExpression.append(btnText);
+                      display.setText(currentExpression.toString());
                   }
               }
 
-              private void loadChat() { chatList.clear(); chatList.addAll(db.messageDao().getAllMessages()); adapter.notifyDataSetChanged(); }
+              private void calculateResult() {
+                  try {
+                      String mathExpression = currentExpression.toString();
+                      double result = eval(mathExpression);
+                      
+                      // Remove decimal if it's a whole number
+                      String finalResult = (result == (long) result) ? String.format(Locale.US, "%d", (long) result) : String.format(Locale.US, "%s", result);
+                      
+                      display.setText(finalResult);
+                      currentExpression.setLength(0);
+                      currentExpression.append(finalResult);
 
-              @Override public boolean onCreateOptionsMenu(Menu menu) { getMenuInflater().inflate(R.menu.main_menu, menu); return true; }
-              @Override public boolean onOptionsItemSelected(MenuItem item) {
-                  if(item.getItemId() == R.id.clear_history) { db.messageDao().deleteAll(); loadChat(); Toast.makeText(this, "History Saaf!", Toast.LENGTH_SHORT).show(); }
-                  else if(item.getItemId() == R.id.clear_cache) { 
-                      try { File dir = getCacheDir(); if (dir != null && dir.isDirectory()) deleteDir(dir); Toast.makeText(this, "MB Khali Ho Gaye!", Toast.LENGTH_SHORT).show(); } catch (Exception e) {} 
-                  } return super.onOptionsItemSelected(item);
-              }
-              
-              private boolean deleteDir(File dir) {
-                  if (dir != null && dir.isDirectory()) { for (String child : dir.list()) if (!deleteDir(new File(dir, child))) return false; }
-                  return dir.delete();
-              }
-
-              class ChatAdapter extends ArrayAdapter<Message> {
-                  public ChatAdapter(Context context, List<Message> messages) { super(context, 0, messages); }
-                  @NonNull @Override public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                      if (convertView == null) convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_chat, parent, false);
-                      TextView txt = convertView.findViewById(R.id.msg_text); txt.setText(getItem(position).text);
-                      return convertView;
+                      if (tts != null) {
+                          tts.speak("Result is " + finalResult, TextToSpeech.QUEUE_FLUSH, null, null);
+                      }
+                  } catch (Exception e) {
+                      display.setText("Error");
+                      currentExpression.setLength(0);
                   }
+              }
+
+              // Simple Math Evaluator Logic
+              private double eval(final String str) {
+                  return new Object() {
+                      int pos = -1, ch;
+                      void nextChar() { ch = (++pos < str.length()) ? str.charAt(pos) : -1; }
+                      boolean eat(int charToEat) {
+                          while (ch == ' ') nextChar();
+                          if (ch == charToEat) { nextChar(); return true; }
+                          return false;
+                      }
+                      double parse() { nextChar(); double x = parseExpression(); if (pos < str.length()) throw new RuntimeException("Unexpected: " + (char)ch); return x; }
+                      double parseExpression() {
+                          double x = parseTerm();
+                          for (;;) { if (eat('+')) x += parseTerm(); else if (eat('-')) x -= parseTerm(); else return x; }
+                      }
+                      double parseTerm() {
+                          double x = parseFactor();
+                          for (;;) { if (eat('*')) x *= parseFactor(); else if (eat('/')) x /= parseFactor(); else return x; }
+                      }
+                      double parseFactor() {
+                          if (eat('+')) return parseFactor(); if (eat('-')) return -parseFactor();
+                          double x;
+                          int startPos = this.pos;
+                          if (eat('(')) { x = parseExpression(); eat(')'); }
+                          else if ((ch >= '0' && ch <= '9') || ch == '.') { while ((ch >= '0' && ch <= '9') || ch == '.') nextChar(); x = Double.parseDouble(str.substring(startPos, this.pos)); }
+                          else { throw new RuntimeException("Unexpected: " + (char)ch); }
+                          return x;
+                      }
+                  }.parse();
+              }
+
+              @Override
+              protected void onDestroy() {
+                  if (tts != null) { tts.stop(); tts.shutdown(); }
+                  super.onDestroy();
               }
           }
           EOF
-          
-      - name: Build Flawless APK
+
+      - name: 7. Build Final APK
         run: |
-          chmod +x gradlew
+          chmod +x gradlew || true
           ./gradlew assembleDebug
 
-      - name: Zeeshan Husain Premium App Output
+      - name: 8. Upload Pro Calculator APK
         uses: actions/upload-artifact@v4
         with:
-          name: Zeeshan-Husain-Premium-App
+          name: Zeeshan-Husain-Smile-Voice-Calc
           path: app/build/outputs/apk/debug/app-debug.apk

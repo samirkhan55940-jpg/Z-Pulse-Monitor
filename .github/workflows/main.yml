@@ -18,7 +18,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 1. Setup Root Files (Yeh missing tha!)
+      - name: 1. Generate Gradle Wrapper
+        run: gradle wrapper --gradle-version 8.4
+
+      - name: 2. Setup Root Files
         run: |
           cat << 'EOF' > settings.gradle
           pluginManagement {
@@ -34,18 +37,18 @@ jobs:
 
           cat << 'EOF' > build.gradle
           plugins {
-              id 'com.android.application' version '8.1.1' apply false
+              id 'com.android.application' version '8.3.0' apply false
           }
           EOF
 
-      - name: 2. Setup App Folders
+      - name: 3. Setup App Folders
         run: |
           mkdir -p app/src/main/java/com/zeeshan/calculator
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/drawable
 
-      - name: 3. Write App Build & Config
+      - name: 4. App Build Config
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -63,11 +66,11 @@ jobs:
           }
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'com.google.android.material:material:1.9.0'
+              implementation 'com.google.android.material:material:1.11.0'
           }
           EOF
 
-      - name: 4. Colors & Drawables
+      - name: 5. Themes, Colors & Drawables (Crash Fix)
         run: |
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <resources>
@@ -75,6 +78,15 @@ jobs:
               <color name="btn_color">#395B64</color>
               <color name="text_color">#E7F6F2</color>
               <color name="accent_color">#F582A7</color>
+          </resources>
+          EOF
+
+          cat << 'EOF' > app/src/main/res/values/themes.xml
+          <resources>
+              <style name="Theme.ZeeshanCalc" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+                  <item name="colorPrimary">@color/accent_color</item>
+                  <item name="android:statusBarColor">@color/bg_color</item>
+              </style>
           </resources>
           EOF
           
@@ -86,7 +98,7 @@ jobs:
           </shape>
           EOF
 
-      - name: 5. Create UI Layout
+      - name: 6. Create UI Layout
         run: |
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -102,42 +114,43 @@ jobs:
                   android:gravity="bottom|end" android:text="0" android:textColor="@color/text_color"
                   android:textSize="56sp" android:padding="16dp" android:maxLines="2" android:autoSizeTextType="uniform"/>
 
-              <GridLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+              <GridLayout android:id="@+id/grid_layout"
+                  android:layout_width="match_parent" android:layout_height="wrap_content"
                   android:columnCount="4" android:rowCount="5" android:useDefaultMargins="true" android:alignmentMode="alignBounds">
                   
-                  <Button android:text="AC" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="(" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text=")" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="/" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="AC" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="(" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text=")" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="/" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
 
-                  <Button android:text="7" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="8" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="9" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="*" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="7" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="8" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="9" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="*" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
 
-                  <Button android:text="4" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="5" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="6" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="-" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="4" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="5" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="6" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="-" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
 
-                  <Button android:text="1" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="2" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="3" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="+" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="1" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="2" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="3" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="+" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
 
-                  <Button android:text="0" android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnSpan="2" android:layout_columnWeight="2" android:layout_margin="4dp"/>
-                  <Button android:text="." android:onClick="onButtonClick" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-                  <Button android:text="=" android:onClick="onButtonClick" android:backgroundTint="@color/accent_color" android:textColor="@color/bg_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="0" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnSpan="2" android:layout_columnWeight="2" android:layout_margin="4dp"/>
+                  <Button android:text="." android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
+                  <Button android:text="=" android:backgroundTint="@color/accent_color" android:textColor="@color/bg_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
               </GridLayout>
           </LinearLayout>
           EOF
 
-      - name: 6. Write AndroidManifest
+      - name: 7. Write AndroidManifest
         run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <queries><intent><action android:name="android.intent.action.TTS_SERVICE" /></intent></queries>
-              <application android:label="ZH Calc" android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+              <application android:label="ZH Calc" android:theme="@style/Theme.ZeeshanCalc">
                   <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
@@ -148,7 +161,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: 7. Write Math Engine (Java)
+      - name: 8. Write Math Engine (Java - Fully Wired)
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
           package com.zeeshan.calculator;
@@ -156,7 +169,9 @@ jobs:
           import android.speech.tts.TextToSpeech;
           import android.view.View;
           import android.widget.Button;
+          import android.widget.GridLayout;
           import android.widget.TextView;
+          import android.widget.Toast;
           import androidx.appcompat.app.AppCompatActivity;
           import java.util.Locale;
 
@@ -171,13 +186,26 @@ jobs:
                   setContentView(R.layout.activity_main);
                   display = findViewById(R.id.tv_display);
 
+                  // TTS Setup
                   tts = new TextToSpeech(this, status -> {
-                      if (status == TextToSpeech.SUCCESS) tts.setLanguage(new Locale("en", "IN"));
+                      if (status == TextToSpeech.SUCCESS) {
+                          tts.setLanguage(new Locale("en", "IN"));
+                      } else {
+                          Toast.makeText(this, "Voice setup failed", Toast.LENGTH_SHORT).show();
+                      }
                   });
+
+                  // Button Linker Logic (Fixes buttons not working)
+                  GridLayout grid = findViewById(R.id.grid_layout);
+                  for (int i = 0; i < grid.getChildCount(); i++) {
+                      View child = grid.getChildAt(i);
+                      if (child instanceof Button) {
+                          child.setOnClickListener(v -> onButtonClick((Button) v));
+                      }
+                  }
               }
 
-              public void onButtonClick(View view) {
-                  Button button = (Button) view;
+              private void onButtonClick(Button button) {
                   String btnText = button.getText().toString();
 
                   if (btnText.equals("AC")) {
@@ -186,7 +214,7 @@ jobs:
                   } else if (btnText.equals("=")) {
                       calculateResult();
                   } else {
-                          if (display.getText().toString().equals("0") || display.getText().toString().equals("Error")) {
+                      if (display.getText().toString().equals("0") || display.getText().toString().equals("Error")) {
                           currentExpression.setLength(0);
                       }
                       currentExpression.append(btnText);
@@ -197,6 +225,8 @@ jobs:
               private void calculateResult() {
                   try {
                       String mathExpression = currentExpression.toString();
+                      if (mathExpression.isEmpty()) return;
+                      
                       double result = eval(mathExpression);
                       String finalResult = (result == (long) result) ? String.format(Locale.US, "%d", (long) result) : String.format(Locale.US, "%s", result);
                       
@@ -205,7 +235,7 @@ jobs:
                       currentExpression.append(finalResult);
 
                       if (tts != null) {
-                          tts.speak("Result is " + finalResult, TextToSpeech.QUEUE_FLUSH, null, null);
+                          tts.speak("Answer is " + finalResult, TextToSpeech.QUEUE_FLUSH, null, null);
                       }
                   } catch (Exception e) {
                       display.setText("Error");
@@ -251,13 +281,12 @@ jobs:
           }
           EOF
 
-      - name: 8. Generate Gradle & Build Final APK (Fixed Step)
+      - name: 9. Build Final APK
         run: |
-          gradle wrapper --gradle-version 8.2
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: 9. Upload Pro Calculator APK
+      - name: 10. Upload Final Pro APK
         uses: actions/upload-artifact@v4
         with:
           name: Zeeshan-Husain-Smile-Voice-Calc

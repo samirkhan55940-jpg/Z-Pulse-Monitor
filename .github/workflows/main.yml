@@ -1,8 +1,9 @@
-name: Build Zeeshan Husain Smile Pro Calculator
+name: Zeeshan Husain Smile Pro Build
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   workflow_dispatch:
 
 jobs:
@@ -18,7 +19,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 1. Setup Root Files (FIX: Files pehle banayenge)
+      - name: Step 1 Setup Root Files
         run: |
           cat << 'EOF' > settings.gradle
           pluginManagement {
@@ -31,24 +32,23 @@ jobs:
           rootProject.name = "ZeeshanCalc"
           include ':app'
           EOF
-
           cat << 'EOF' > build.gradle
           plugins {
               id 'com.android.application' version '8.3.0' apply false
           }
           EOF
 
-      - name: 2. Generate Gradle Wrapper (FIX: Ab wrapper run karenge)
+      - name: Step 2 Generate Wrapper
         run: gradle wrapper --gradle-version 8.4
 
-      - name: 3. Setup App Folders
+      - name: Step 3 Setup App Folders
         run: |
           mkdir -p app/src/main/java/com/zeeshan/calculator
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/drawable
 
-      - name: 4. App Build Config
+      - name: Step 4 App Build Config
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -62,7 +62,10 @@ jobs:
                   versionCode 1
                   versionName "1.0-Voice-Premium"
               }
-              compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
           }
           dependencies {
               implementation 'androidx.appcompat:appcompat:1.6.1'
@@ -70,7 +73,7 @@ jobs:
           }
           EOF
 
-      - name: 5. Themes, Colors & Drawables
+      - name: Step 5 Themes and Colors
         run: |
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <resources>
@@ -80,7 +83,6 @@ jobs:
               <color name="accent_color">#F582A7</color>
           </resources>
           EOF
-
           cat << 'EOF' > app/src/main/res/values/themes.xml
           <resources>
               <style name="Theme.ZeeshanCalc" parent="Theme.MaterialComponents.DayNight.NoActionBar">
@@ -89,7 +91,6 @@ jobs:
               </style>
           </resources>
           EOF
-          
           cat << 'EOF' > app/src/main/res/drawable/bg_button.xml
           <shape xmlns:android="http://schemas.android.com/apk/res/android">
               <solid android:color="@color/btn_color"/>
@@ -98,46 +99,38 @@ jobs:
           </shape>
           EOF
 
-      - name: 6. Create UI Layout
+      - name: Step 6 Create UI Layout
         run: |
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent" android:layout_height="match_parent"
               android:orientation="vertical" android:background="@color/bg_color" android:padding="16dp">
-              
               <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
                   android:text="Zeeshan Husain Smile AI Calc" android:textColor="@color/accent_color"
                   android:textSize="14sp" android:textStyle="bold" android:gravity="center" android:padding="8dp"/>
-
               <TextView android:id="@+id/tv_display"
                   android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1"
                   android:gravity="bottom|end" android:text="0" android:textColor="@color/text_color"
                   android:textSize="56sp" android:padding="16dp" android:maxLines="2" android:autoSizeTextType="uniform"/>
-
               <GridLayout android:id="@+id/grid_layout"
                   android:layout_width="match_parent" android:layout_height="wrap_content"
                   android:columnCount="4" android:rowCount="5" android:useDefaultMargins="true" android:alignmentMode="alignBounds">
-                  
                   <Button android:text="AC" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="(" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text=")" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="/" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-
                   <Button android:text="7" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="8" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="9" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="*" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-
                   <Button android:text="4" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="5" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="6" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="-" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-
                   <Button android:text="1" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="2" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="3" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="+" android:background="@drawable/bg_button" android:textColor="@color/accent_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
-
                   <Button android:text="0" android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnSpan="2" android:layout_columnWeight="2" android:layout_margin="4dp"/>
                   <Button android:text="." android:background="@drawable/bg_button" android:textColor="@color/text_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
                   <Button android:text="=" android:backgroundTint="@color/accent_color" android:textColor="@color/bg_color" android:layout_columnWeight="1" android:layout_margin="4dp"/>
@@ -145,7 +138,7 @@ jobs:
           </LinearLayout>
           EOF
 
-      - name: 7. Write AndroidManifest
+      - name: Step 7 Write AndroidManifest
         run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -161,7 +154,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: 8. Write Math Engine (Java)
+      - name: Step 8 Write Math Engine
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
           package com.zeeshan.calculator;
@@ -174,18 +167,15 @@ jobs:
           import android.widget.Toast;
           import androidx.appcompat.app.AppCompatActivity;
           import java.util.Locale;
-
           public class MainActivity extends AppCompatActivity {
               private TextToSpeech tts;
               private TextView display;
               private StringBuilder currentExpression = new StringBuilder();
-
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
                   setContentView(R.layout.activity_main);
                   display = findViewById(R.id.tv_display);
-
                   tts = new TextToSpeech(this, status -> {
                       if (status == TextToSpeech.SUCCESS) {
                           tts.setLanguage(new Locale("en", "IN"));
@@ -193,7 +183,6 @@ jobs:
                           Toast.makeText(this, "Voice setup failed", Toast.LENGTH_SHORT).show();
                       }
                   });
-
                   GridLayout grid = findViewById(R.id.grid_layout);
                   for (int i = 0; i < grid.getChildCount(); i++) {
                       View child = grid.getChildAt(i);
@@ -202,10 +191,8 @@ jobs:
                       }
                   }
               }
-
               private void onButtonClick(Button button) {
                   String btnText = button.getText().toString();
-
                   if (btnText.equals("AC")) {
                       currentExpression.setLength(0);
                       display.setText("0");
@@ -219,19 +206,15 @@ jobs:
                       display.setText(currentExpression.toString());
                   }
               }
-
               private void calculateResult() {
                   try {
                       String mathExpression = currentExpression.toString();
                       if (mathExpression.isEmpty()) return;
-                      
                       double result = eval(mathExpression);
                       String finalResult = (result == (long) result) ? String.format(Locale.US, "%d", (long) result) : String.format(Locale.US, "%s", result);
-                      
                       display.setText(finalResult);
                       currentExpression.setLength(0);
                       currentExpression.append(finalResult);
-
                       if (tts != null) {
                           tts.speak("Answer is " + finalResult, TextToSpeech.QUEUE_FLUSH, null, null);
                       }
@@ -240,7 +223,6 @@ jobs:
                       currentExpression.setLength(0);
                   }
               }
-
               private double eval(final String str) {
                   return new Object() {
                       int pos = -1, ch;
@@ -270,7 +252,6 @@ jobs:
                       }
                   }.parse();
               }
-
               @Override
               protected void onDestroy() {
                   if (tts != null) { tts.stop(); tts.shutdown(); }
@@ -279,12 +260,12 @@ jobs:
           }
           EOF
 
-      - name: 9. Build Final APK
+      - name: Step 9 Build Final APK
         run: |
           chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: 10. Upload Final Pro APK
+      - name: Step 10 Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Zeeshan-Husain-Smile-Voice-Calc

@@ -18,14 +18,34 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: 1. Setup App Folders
+      - name: 1. Setup Root Files (Yeh missing tha!)
+        run: |
+          cat << 'EOF' > settings.gradle
+          pluginManagement {
+              repositories { google(); mavenCentral(); gradlePluginPortal() }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories { google(); mavenCentral() }
+          }
+          rootProject.name = "ZeeshanCalc"
+          include ':app'
+          EOF
+
+          cat << 'EOF' > build.gradle
+          plugins {
+              id 'com.android.application' version '8.1.1' apply false
+          }
+          EOF
+
+      - name: 2. Setup App Folders
         run: |
           mkdir -p app/src/main/java/com/zeeshan/calculator
           mkdir -p app/src/main/res/values
           mkdir -p app/src/main/res/layout
           mkdir -p app/src/main/res/drawable
 
-      - name: 2. Write Build & Config
+      - name: 3. Write App Build & Config
         run: |
           cat << 'EOF' > app/build.gradle
           plugins { id 'com.android.application' }
@@ -47,6 +67,8 @@ jobs:
           }
           EOF
 
+      - name: 4. Colors & Drawables
+        run: |
           cat << 'EOF' > app/src/main/res/values/colors.xml
           <resources>
               <color name="bg_color">#2C3333</color>
@@ -55,9 +77,7 @@ jobs:
               <color name="accent_color">#F582A7</color>
           </resources>
           EOF
-
-      - name: 3. Design Neumorphic Buttons
-        run: |
+          
           cat << 'EOF' > app/src/main/res/drawable/bg_button.xml
           <shape xmlns:android="http://schemas.android.com/apk/res/android">
               <solid android:color="@color/btn_color"/>
@@ -66,7 +86,7 @@ jobs:
           </shape>
           EOF
 
-      - name: 4. Create UI Layout (All Buttons)
+      - name: 5. Create UI Layout
         run: |
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -112,7 +132,7 @@ jobs:
           </LinearLayout>
           EOF
 
-      - name: 5. Write AndroidManifest
+      - name: 6. Write AndroidManifest
         run: |
           cat << 'EOF' > app/src/main/AndroidManifest.xml
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -128,7 +148,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: 6. Write Math Engine & Voice Logic (Java)
+      - name: 7. Write Math Engine (Java)
         run: |
           cat << 'EOF' > app/src/main/java/com/zeeshan/calculator/MainActivity.java
           package com.zeeshan.calculator;
@@ -166,7 +186,7 @@ jobs:
                   } else if (btnText.equals("=")) {
                       calculateResult();
                   } else {
-                      if (display.getText().toString().equals("0") || display.getText().toString().equals("Error")) {
+                          if (display.getText().toString().equals("0") || display.getText().toString().equals("Error")) {
                           currentExpression.setLength(0);
                       }
                       currentExpression.append(btnText);
@@ -178,8 +198,6 @@ jobs:
                   try {
                       String mathExpression = currentExpression.toString();
                       double result = eval(mathExpression);
-                      
-                      // Remove decimal if it's a whole number
                       String finalResult = (result == (long) result) ? String.format(Locale.US, "%d", (long) result) : String.format(Locale.US, "%s", result);
                       
                       display.setText(finalResult);
@@ -195,7 +213,6 @@ jobs:
                   }
               }
 
-              // Simple Math Evaluator Logic
               private double eval(final String str) {
                   return new Object() {
                       int pos = -1, ch;
@@ -234,12 +251,13 @@ jobs:
           }
           EOF
 
-      - name: 7. Build Final APK
+      - name: 8. Generate Gradle & Build Final APK (Fixed Step)
         run: |
-          chmod +x gradlew || true
+          gradle wrapper --gradle-version 8.2
+          chmod +x gradlew
           ./gradlew assembleDebug
 
-      - name: 8. Upload Pro Calculator APK
+      - name: 9. Upload Pro Calculator APK
         uses: actions/upload-artifact@v4
         with:
           name: Zeeshan-Husain-Smile-Voice-Calc
